@@ -82,11 +82,11 @@ BitAI will execute according to the risk level you select.
 
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
-# ============ ENTRY MESSAGE WITH 4 BUTTONS ============
+# ============ ENTRY MESSAGE ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # Send video with the message as caption
+    # Send video with caption
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['entry'],
@@ -94,7 +94,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
-    # 4 Buttons exactly as in PDF
+    # Send buttons separately
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register my FREE BitAl account", callback_data='register')],
         [InlineKeyboardButton("Download BitAl (iOS & Android)", callback_data='download')],
@@ -103,12 +103,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
-# ============ STEP 1/7 WITH 4 BUTTONS ============
+# ============ STEP 1 ============
 async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
     
+    # Delete the previous message with buttons
+    try:
+        await query.message.delete()
+    except:
+        pass
+    
+    # Send Step 1 video with caption
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step1'],
@@ -116,6 +124,7 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
+    # Send Step 1 buttons
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
         [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
@@ -124,11 +133,17 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 1/7:", reply_markup=keyboard)
 
-# ============ STEP 2/7 WITH 4 BUTTONS ============
+# ============ STEP 2 ============
 async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -145,11 +160,17 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 2/7:", reply_markup=keyboard)
 
-# ============ STEP 3/7 WITH 2 BUTTONS ============
+# ============ STEP 3 ============
 async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -164,11 +185,17 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 3/7:", reply_markup=keyboard)
 
-# ============ STEP 4/7 WITH 3 BUTTONS ============
+# ============ STEP 4 ============
 async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -184,11 +211,17 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 4/7:", reply_markup=keyboard)
 
-# ============ STEP 5/7 WITH 3 BUTTONS ============
+# ============ STEP 5 ============
 async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -204,11 +237,17 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 5/7:", reply_markup=keyboard)
 
-# ============ STEP 6/7 WITH 3 BUTTONS ============
+# ============ STEP 6 ============
 async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -224,11 +263,17 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7:", reply_markup=keyboard)
 
-# ============ STEP 7/7 WITH 5 BUTTONS ============
+# ============ STEP 7 ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = query.message.chat.id
+    
+    try:
+        await query.message.delete()
+    except:
+        pass
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -246,26 +291,26 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 7/7:", reply_markup=keyboard)
 
-# ============ SIMPLE BUTTON HANDLERS ============
+# ============ UTILITY HANDLERS ============
 async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"Register here: {REGISTER_LINK}")
+    await query.edit_message_text(f"🔗 Register here:\n{REGISTER_LINK}")
 
 async def handle_download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"Download BitAl: {DOWNLOAD_BITAL}")
+    await query.edit_message_text(f"📱 Download BitAl:\n{DOWNLOAD_BITAL}")
 
 async def handle_support(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"Contact support: {SUPPORT_WA}")
+    await query.edit_message_text(f"📞 Contact support:\n{SUPPORT_WA}")
 
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text("Conversation ended. Send /start to begin again.")
+    await query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
 
 # ============ MAIN ============
 def main():
@@ -289,7 +334,7 @@ def main():
     app.add_handler(CallbackQueryHandler(step6, pattern='^step6$'))
     app.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
     
-    logger.info("✅ Bot is ready! Following PDF exactly.")
+    logger.info("✅ Bot is ready!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
