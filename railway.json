@@ -3,7 +3,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python bital_bot.py",
-    "restartPolicyType": "ON_FAILURE"
+    "startCommand": "python bital_bot.py"
   }
 }
