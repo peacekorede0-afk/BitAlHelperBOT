@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-# ============ YOUR FILE_IDS (COLLECTED FROM BOT) ============
+# ============ YOUR FILE_IDS ============
 VIDEOS = {
     'entry': 'BAACAgQAAxkBAAMYai3-z5ZB7JVZa9przLZIZX5rjUIAArwhAAJdNnBRRGw2cWcHYMA8BA',
     'step1': 'BAACAgQAAxkBAAMaai3_GuiDvvO1PpJlFlZpUro9yj0AAr0hAAJdNnBRd5_eEgx7yLA8BA',
@@ -21,18 +21,16 @@ VIDEOS = {
 }
 
 # ============ LINKS ============
-LINKS = {
-    'register': 'https://app.bitai.app/h5/#/pages/sign/sign?invite=888',
-    'download': 'https://fr.bitai.app/app.html',
-    'binance_register': 'https://accounts.binance.com/en/register?ref=1154159582',
-    'binance_download': 'https://www.binance.com/en/download',
-    'support': 'http://wa.me/6589691668',
-    'email': 'info@bitai.app',
-    'website': 'https://www.bitai.app'
-}
+REGISTER_LINK = 'https://app.bitai.app/h5/#/pages/sign/sign?invite=888'
+DOWNLOAD_BITAL = 'https://fr.bitai.app/app.html'
+BINANCE_REGISTER = 'https://accounts.binance.com/en/register?ref=1154159582'
+BINANCE_DOWNLOAD = 'https://www.binance.com/en/download'
+SUPPORT_WA = 'http://wa.me/6589691668'
+EMAIL_SUPPORT = 'info@bitai.app'
+WEBSITE = 'https://www.bitai.app'
 
-# ============ MESSAGES ============
-ENTRY_MSG = """Welcome to BitAl by Affinity AI 🚀
+# ============ EXACT MESSAGES FROM PDF ============
+ENTRY_MESSAGE = """Welcome to BitAl by Affinity AI 🚀
 
 Most crypto traders don't lose because they lack knowledge.
 
@@ -40,27 +38,27 @@ They lose because manual trading is emotional, bot settings are messy, and execu
 
 It's time to upgrade to BitAl - built to analyze real-time market data and execute your trades automatically, 24/7."""
 
-STEP1_MSG = """Step 1/7: Register and download BitAl
+STEP1_MESSAGE = """Step 1/7: Register and download BitAl
 
 To start using BitAl, you need to register for your FREE BitAl account and download BitAl app. If you are referred by our BitAl user, please use their referral link to register."""
 
-STEP2_MSG = """Step 2/7: Setting up Binance Account
+STEP2_MESSAGE = """Step 2/7: Setting up Binance Account
 
 To start using BitAl, you need a Binance account with KYC verification completed.
 
 Already have a verified Binance account? You may skip this video and continue to BitAI License Activation."""
 
-STEP3_MSG = """Step 3/7: BitAI License Activation
+STEP3_MESSAGE = """Step 3/7: BitAI License Activation
 
 To unlock BitAI's full auto AI trading, activate your BitAI License inside your BitAI app. Once activated, you can proceed to activate & enable your Binance Futures."""
 
-STEP4_MSG = """Step 4/7: Activate & Enable Binance Futures
+STEP4_MESSAGE = """Step 4/7: Activate & Enable Binance Futures
 
 Before BitAI can execute, you need to activate Binance Futures inside your Binance account.
 
 Once Futures is enabled, you can continue to the next step and create your Binance API connection."""
 
-STEP5_MSG = """Step 5/7: Set Up Your API Keys
+STEP5_MESSAGE = """Step 5/7: Set Up Your API Keys
 
 Next, create your Binance API Keys and connect them to your BitAI account.
 
@@ -68,7 +66,7 @@ This allows BitAI to analyze real-time market data and execute based on your sel
 
 Make sure your API Keys are kept private and only connected inside the official BitAI platform."""
 
-STEP6_MSG = """Step 6/7: Transfer USDT to Binance Futures
+STEP6_MESSAGE = """Step 6/7: Transfer USDT to Binance Futures
 
 Before BitAI can execute, make sure your USDT is transferred into your own Binance Futures Wallet.
 
@@ -76,7 +74,7 @@ This will be the capital used for BitAI's AI-driven execution based on your sele
 
 Once completed, continue to Select Risk Profile."""
 
-STEP7_MSG = """Step 7/7: Select Your Risk Profile
+STEP7_MESSAGE = """Step 7/7: Select Your Risk Profile
 
 Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
 
@@ -84,31 +82,19 @@ BitAI will execute according to the risk level you select.
 
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
-# ============ VIDEO SENDER ============
-async def send_video(chat_id, context, step_key, caption=""):
-    """Send video directly using file_id"""
-    try:
-        await context.bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS[step_key],
-            caption=caption,
-            parse_mode='Markdown',
-            supports_streaming=True
-        )
-        logger.info(f"✅ Sent video {step_key}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send video {step_key}: {e}")
-        await context.bot.send_message(chat_id=chat_id, text=f"Error loading video. Please contact support.")
-        return False
-
-# ============ COMMAND HANDLERS ============
+# ============ ENTRY MESSAGE WITH 4 BUTTONS ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Entry point - shows video and 4 buttons"""
     chat_id = update.effective_chat.id
     
-    await send_video(chat_id, context, 'entry', ENTRY_MSG)
+    # Send video with the message as caption
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['entry'],
+        caption=ENTRY_MESSAGE,
+        parse_mode='Markdown'
+    )
     
+    # 4 Buttons exactly as in PDF
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register my FREE BitAl account", callback_data='register')],
         [InlineKeyboardButton("Download BitAl (iOS & Android)", callback_data='download')],
@@ -117,99 +103,169 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
-async def show_step(update: Update, context: ContextTypes.DEFAULT_TYPE, step_num, message, buttons):
+# ============ STEP 1/7 WITH 4 BUTTONS ============
+async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
     
-    try:
-        await query.message.delete()
-    except:
-        pass
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step1'],
+        caption=STEP1_MESSAGE,
+        parse_mode='Markdown'
+    )
     
-    await send_video(chat_id, context, f'step{step_num}', message)
-    
-    keyboard = InlineKeyboardMarkup(buttons)
-    await context.bot.send_message(chat_id=chat_id, text=f"Step {step_num}/7:", reply_markup=keyboard)
-
-async def step1_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
-        [InlineKeyboardButton("Register FREE BitAl account", url=LINKS['register'])],
-        [InlineKeyboardButton("Download BitAl", url=LINKS['download'])],
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
+        [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
         [InlineKeyboardButton("Skip to Setting up Binance Account", callback_data='step2')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 1, STEP1_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 1/7:", reply_markup=keyboard)
 
-async def step2_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
-        [InlineKeyboardButton("Create a FREE Binance account", url=LINKS['binance_register'])],
-        [InlineKeyboardButton("Download Binance (iOS & Android)", url=LINKS['binance_download'])],
+# ============ STEP 2/7 WITH 4 BUTTONS ============
+async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step2'],
+        caption=STEP2_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Create a FREE Binance account", url=BINANCE_REGISTER)],
+        [InlineKeyboardButton("Download Binance (iOS & Android)", url=BINANCE_DOWNLOAD)],
         [InlineKeyboardButton("Skip to License Activation", callback_data='step3')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 2, STEP2_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 2/7:", reply_markup=keyboard)
 
-async def step3_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
+# ============ STEP 3/7 WITH 2 BUTTONS ============
+async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step3'],
+        caption=STEP3_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Skip to Activate & Enable Binance Futures", callback_data='step4')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 3, STEP3_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 3/7:", reply_markup=keyboard)
 
-async def step4_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
+# ============ STEP 4/7 WITH 3 BUTTONS ============
+async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step4'],
+        caption=STEP4_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Skip to setting API Keys", callback_data='step5')],
         [InlineKeyboardButton("Back to previous step", callback_data='step3')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 4, STEP4_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 4/7:", reply_markup=keyboard)
 
-async def step5_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
+# ============ STEP 5/7 WITH 3 BUTTONS ============
+async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step5'],
+        caption=STEP5_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Skip to Transferring USDT to Binance Futures", callback_data='step6')],
         [InlineKeyboardButton("Back to previous step", callback_data='step4')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 5, STEP5_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 5/7:", reply_markup=keyboard)
 
-async def step6_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
+# ============ STEP 6/7 WITH 3 BUTTONS ============
+async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step6'],
+        caption=STEP6_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Skip to Select Risk Profile", callback_data='step7')],
         [InlineKeyboardButton("Back to previous step", callback_data='step5')],
         [InlineKeyboardButton("Contact support", callback_data='support')]
-    ]
-    await show_step(update, context, 6, STEP6_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 6/7:", reply_markup=keyboard)
 
-async def step7_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buttons = [
+# ============ STEP 7/7 WITH 5 BUTTONS ============
+async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat.id
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step7'],
+        caption=STEP7_MESSAGE,
+        parse_mode='Markdown'
+    )
+    
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Back to previous step", callback_data='step6')],
-        [InlineKeyboardButton("Website", url=LINKS['website'])],
-        [InlineKeyboardButton("Email support", url=f"mailto:{LINKS['email']}")],
-        [InlineKeyboardButton("Contact support", url=LINKS['support'])],
+        [InlineKeyboardButton("Website", url=WEBSITE)],
+        [InlineKeyboardButton("Email support", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)],
         [InlineKeyboardButton("Exit Conversation", callback_data='exit')]
-    ]
-    await show_step(update, context, 7, STEP7_MSG, buttons)
+    ])
+    await context.bot.send_message(chat_id=chat_id, text="Step 7/7:", reply_markup=keyboard)
 
+# ============ SIMPLE BUTTON HANDLERS ============
 async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"🔗 Register here:\n{LINKS['register']}")
+    await query.edit_message_text(f"Register here: {REGISTER_LINK}")
 
 async def handle_download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"📱 Download BitAl:\n{LINKS['download']}")
+    await query.edit_message_text(f"Download BitAl: {DOWNLOAD_BITAL}")
 
 async def handle_support(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(f"📞 Contact support:\n{LINKS['support']}")
+    await query.edit_message_text(f"Contact support: {SUPPORT_WA}")
 
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
+    await query.edit_message_text("Conversation ended. Send /start to begin again.")
 
 # ============ MAIN ============
 def main():
@@ -217,21 +273,23 @@ def main():
     
     app = Application.builder().token(BOT_TOKEN).build()
     
+    # Command
     app.add_handler(CommandHandler("start", start))
     
+    # Callback handlers
     app.add_handler(CallbackQueryHandler(handle_register, pattern='^register$'))
     app.add_handler(CallbackQueryHandler(handle_download, pattern='^download$'))
     app.add_handler(CallbackQueryHandler(handle_support, pattern='^support$'))
     app.add_handler(CallbackQueryHandler(handle_exit, pattern='^exit$'))
-    app.add_handler(CallbackQueryHandler(step1_handler, pattern='^step1$'))
-    app.add_handler(CallbackQueryHandler(step2_handler, pattern='^step2$'))
-    app.add_handler(CallbackQueryHandler(step3_handler, pattern='^step3$'))
-    app.add_handler(CallbackQueryHandler(step4_handler, pattern='^step4$'))
-    app.add_handler(CallbackQueryHandler(step5_handler, pattern='^step5$'))
-    app.add_handler(CallbackQueryHandler(step6_handler, pattern='^step6$'))
-    app.add_handler(CallbackQueryHandler(step7_handler, pattern='^step7$'))
+    app.add_handler(CallbackQueryHandler(step1, pattern='^step1$'))
+    app.add_handler(CallbackQueryHandler(step2, pattern='^step2$'))
+    app.add_handler(CallbackQueryHandler(step3, pattern='^step3$'))
+    app.add_handler(CallbackQueryHandler(step4, pattern='^step4$'))
+    app.add_handler(CallbackQueryHandler(step5, pattern='^step5$'))
+    app.add_handler(CallbackQueryHandler(step6, pattern='^step6$'))
+    app.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
     
-    logger.info("✅ Bot is ready! Videos will play directly.")
+    logger.info("✅ Bot is ready! Following PDF exactly.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
