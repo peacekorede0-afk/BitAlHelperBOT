@@ -1,12 +1,24 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+
+# ============ YOUR FILE_IDS (COLLECTED FROM BOT) ============
+VIDEOS = {
+    'entry': 'BAACAgQAAxkBAAMYai3-z5ZB7JVZa9przLZIZX5rjUIAArwhAAJdNnBRRGw2cWcHYMA8BA',
+    'step1': 'BAACAgQAAxkBAAMaai3_GuiDvvO1PpJlFlZpUro9yj0AAr0hAAJdNnBRd5_eEgx7yLA8BA',
+    'step2': 'BAACAgQAAxkBAAMcai3_QFVXTCnldA_vUQNWVmhH8csAAr4hAAJdNnBRC4W2zTZTRRg8BA',
+    'step3': 'BAACAgQAAxkBAAMeai3_Tozjn7lPqIpT0anRYep-uDUAAr8hAAJdNnBRpLVsK7JLfZ48BA',
+    'step4': 'BAACAgQAAxkBAAMgai3_X76fPHfZK13m9wqlDpEp728AAsEhAAJdNnBRtmVky1-zBKY8BA',
+    'step5': 'BAACAgQAAxkBAAMiai3_dW99shMtSBh9pM9x9WA-LqkAAsIhAAJdNnBRGlzR_hVQSO08BA',
+    'step6': 'BAACAgQAAxkBAAMkai3_iBEsrC3T2-JqEtXb0eKQrL8AAsMhAAJdNnBRvhqvjSHZlag8BA',
+    'step7': 'BAACAgQAAxkBAAMmai3_vwlSsuChBpj6ZSw1rw8tpQUAAsQhAAJdNnBRAAEC-ApFvpvMPAQ'
+}
 
 # ============ LINKS ============
 LINKS = {
@@ -17,20 +29,6 @@ LINKS = {
     'support': 'http://wa.me/6589691668',
     'email': 'info@bitai.app',
     'website': 'https://www.bitai.app'
-}
-
-# ============ TEMPORARY: Store file_ids as we capture them ============
-# Send each video to this bot, it will show you the correct file_id
-# Then replace these placeholders
-VIDEOS = {
-    'entry': 'WAITING_FOR_VIDEO_SEND_ENTRY_TO_BOT',
-    'step1': 'WAITING_FOR_VIDEO_SEND_STEP1_TO_BOT',
-    'step2': 'WAITING_FOR_VIDEO_SEND_STEP2_TO_BOT',
-    'step3': 'WAITING_FOR_VIDEO_SEND_STEP3_TO_BOT',
-    'step4': 'WAITING_FOR_VIDEO_SEND_STEP4_TO_BOT',
-    'step5': 'WAITING_FOR_VIDEO_SEND_STEP5_TO_BOT',
-    'step6': 'WAITING_FOR_VIDEO_SEND_STEP6_TO_BOT',
-    'step7': 'WAITING_FOR_VIDEO_SEND_STEP7_TO_BOT'
 }
 
 # ============ MESSAGES ============
@@ -87,22 +85,14 @@ BitAI will execute according to the risk level you select.
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
 # ============ VIDEO SENDER ============
-async def send_video(chat_id, context, step_key):
-    """Send video directly - NO LINKS"""
-    video_id = VIDEOS[step_key]
-    
-    if video_id.startswith('WAITING_FOR_VIDEO'):
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"⚠️ Video not configured yet. Please send the {step_key} video to this bot first."
-        )
-        return False
-    
+async def send_video(chat_id, context, step_key, caption=""):
+    """Send video directly using file_id"""
     try:
         await context.bot.send_video(
             chat_id=chat_id,
-            video=video_id,
-            caption="🎥 Video loaded successfully!",
+            video=VIDEOS[step_key],
+            caption=caption,
+            parse_mode='Markdown',
             supports_streaming=True
         )
         logger.info(f"✅ Sent video {step_key}")
@@ -117,11 +107,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Entry point - shows video and 4 buttons"""
     chat_id = update.effective_chat.id
     
-    # Send video first (NO LINK)
-    await send_video(chat_id, context, 'entry')
-    
-    # Then send message with buttons
-    await context.bot.send_message(chat_id=chat_id, text=ENTRY_MSG, parse_mode='Markdown')
+    await send_video(chat_id, context, 'entry', ENTRY_MSG)
     
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register my FREE BitAl account", callback_data='register')],
@@ -132,28 +118,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
 async def show_step(update: Update, context: ContextTypes.DEFAULT_TYPE, step_num, message, buttons):
-    """Generic function to show a step with video"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
     
-    # Delete old message
     try:
         await query.message.delete()
     except:
         pass
     
-    # Send video for this step (NO LINK)
-    await send_video(chat_id, context, f'step{step_num}')
+    await send_video(chat_id, context, f'step{step_num}', message)
     
-    # Send message
-    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
-    
-    # Send buttons
     keyboard = InlineKeyboardMarkup(buttons)
     await context.bot.send_message(chat_id=chat_id, text=f"Step {step_num}/7:", reply_markup=keyboard)
 
-# ============ STEP HANDLERS ============
 async def step1_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     buttons = [
         [InlineKeyboardButton("Register FREE BitAl account", url=LINKS['register'])],
@@ -213,7 +191,6 @@ async def step7_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await show_step(update, context, 7, STEP7_MSG, buttons)
 
-# ============ SIMPLE BUTTON HANDLERS ============
 async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -234,36 +211,14 @@ async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     await query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
 
-# ============ VIDEO CAPTURE - SEND VIDEOS HERE TO GET FILE_IDS ============
-async def capture_video_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """When you send a video to this bot, it tells you the file_id"""
-    if update.message.video:
-        file_id = update.message.video.file_id
-        file_size = update.message.video.file_size / (1024 * 1024)
-        
-        await update.message.reply_text(
-            f"✅ *VIDEO CAPTURED!*\n\n"
-            f"📹 *file_id:*\n"
-            f"`{file_id}`\n\n"
-            f"📊 Size: {file_size:.1f}MB\n\n"
-            f"*Copy this file_id and paste it into the VIDEOS dictionary in your code.*",
-            parse_mode='Markdown'
-        )
-        logger.info(f"Captured file_id: {file_id[:50]}...")
-
 # ============ MAIN ============
 def main():
     logger.info("🚀 Starting BitAl Bot...")
     
     app = Application.builder().token(BOT_TOKEN).build()
     
-    # Command
     app.add_handler(CommandHandler("start", start))
     
-    # Video capture (REMOVE THIS AFTER GETTING FILE_IDS)
-    app.add_handler(MessageHandler(filters.VIDEO, capture_video_file_id))
-    
-    # Callback handlers
     app.add_handler(CallbackQueryHandler(handle_register, pattern='^register$'))
     app.add_handler(CallbackQueryHandler(handle_download, pattern='^download$'))
     app.add_handler(CallbackQueryHandler(handle_support, pattern='^support$'))
@@ -276,7 +231,7 @@ def main():
     app.add_handler(CallbackQueryHandler(step6_handler, pattern='^step6$'))
     app.add_handler(CallbackQueryHandler(step7_handler, pattern='^step7$'))
     
-    logger.info("✅ Bot is ready!")
+    logger.info("✅ Bot is ready! Videos will play directly.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
