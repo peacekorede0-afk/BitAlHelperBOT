@@ -254,7 +254,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 - FIXED BUTTONS ============
+# ============ STEP 7 - EXACT BUTTONS WITH FULL TEXT ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -274,37 +274,20 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
-    # Simple buttons - each in its own row with URL links
+    # 5 Buttons with full descriptive text and correct links
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
-        [InlineKeyboardButton("Website", url=WEBSITE)],
-        [InlineKeyboardButton("Email Support", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("Contact Support", url=SUPPORT_WA)],
-        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
+        [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
+        [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
+        [InlineKeyboardButton("Email support: info@bitai.app", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
+        [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
     ])
     
-    try:
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text="✅ Setup Complete! Select an option:",
-            reply_markup=keyboard
-        )
-        logger.info(f"✅ Step 7 buttons sent to {chat_id}")
-    except Exception as e:
-        logger.error(f"Failed to send Step 7 buttons: {e}")
-        # Fallback: Send buttons without text
-        try:
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text="✅ Setup Complete!",
-                reply_markup=keyboard
-            )
-        except Exception as e2:
-            logger.error(f"Fallback also failed: {e2}")
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text="✅ Setup Complete!\n\nVisit website: " + WEBSITE
-            )
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="✅ Step 7/7 - Setup Complete!\n\nSelect an option:",
+        reply_markup=keyboard
+    )
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
