@@ -85,7 +85,6 @@ Once done, BitAI will start to analyze real time market data and execute your tr
 # ============ START ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    logger.info(f"User {chat_id} started")
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -107,7 +106,6 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 1")
     
     try:
         await query.message.delete()
@@ -134,7 +132,6 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 2")
     
     try:
         await query.message.delete()
@@ -162,7 +159,6 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 3")
     
     try:
         await query.message.delete()
@@ -188,7 +184,6 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 4")
     
     try:
         await query.message.delete()
@@ -214,7 +209,6 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 5")
     
     try:
         await query.message.delete()
@@ -240,7 +234,6 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 6")
     
     try:
         await query.message.delete()
@@ -261,20 +254,19 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 - WITH 5 BUTTONS ============
+# ============ STEP 7 - WITH SHORTENED BUTTONS ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 7 - SENDING BUTTONS NOW")
     
-    # Delete the previous message
+    # Delete previous message
     try:
         await query.message.delete()
     except:
         pass
     
-    # Send the Step 7 video
+    # Send Step 7 video
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step7'],
@@ -282,23 +274,20 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
-    # Create the 5 buttons
+    # SHORTENED buttons (Telegram max 64 chars per button)
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
-        [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
-        [InlineKeyboardButton("Email support: info@bitai.app", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
-        [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
+        [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
+        [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
+        [InlineKeyboardButton("✉️ Email Support", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("📞 Contact Support", url=SUPPORT_WA)],
+        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
     ])
     
-    # Send the buttons in a separate message
     await context.bot.send_message(
         chat_id=chat_id,
         text="✅ Setup Complete! Choose an option below:",
         reply_markup=keyboard
     )
-    
-    logger.info(f"Step 7 buttons sent to {chat_id}")
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
