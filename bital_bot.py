@@ -254,7 +254,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 - WITH SHORTENED BUTTONS ============
+# ============ STEP 7 - SIMPLIFIED APPROACH ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -274,18 +274,18 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
-    # SHORTENED buttons (Telegram max 64 chars per button)
+    # Send buttons as a separate message with simple text
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
-        [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
-        [InlineKeyboardButton("✉️ Email Support", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("📞 Contact Support", url=SUPPORT_WA)],
-        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
+        [InlineKeyboardButton("Back to Step 6", callback_data='step6')],
+        [InlineKeyboardButton("Website", url=WEBSITE)],
+        [InlineKeyboardButton("Email", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("Support", url=SUPPORT_WA)],
+        [InlineKeyboardButton("Exit", callback_data='exit')]
     ])
     
     await context.bot.send_message(
         chat_id=chat_id,
-        text="✅ Setup Complete! Choose an option below:",
+        text="✅ Setup Complete!",
         reply_markup=keyboard
     )
 
