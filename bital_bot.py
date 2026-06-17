@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 # ============ YOUR FILE_IDS ============
-# The first video (entry) is the recorded webinar from your YouTube link
 VIDEOS = {
-    'entry': 'BAACAgQAAxkBAAMYai3-z5ZB7JVZa9przLZIZX5rjUIAArwhAAJdNnBRRGw2cWcHYMA8BA',  # Recorded Webinar
+    'entry': 'BAACAgQAAxkBAAMYai3-z5ZB7JVZa9przLZIZX5rjUIAArwhAAJdNnBRRGw2cWcHYMA8BA',
     'step1': 'BAACAgQAAxkBAAMaai3_GuiDvvO1PpJlFlZpUro9yj0AAr0hAAJdNnBRd5_eEgx7yLA8BA',
     'step2': 'BAACAgQAAxkBAAMcai3_QFVXTCnldA_vUQNWVmhH8csAAr4hAAJdNnBRC4W2zTZTRRg8BA',
     'step3': 'BAACAgQAAxkBAAMeai3_Tozjn7lPqIpT0anRYep-uDUAAr8hAAJdNnBRpLVsK7JLfZ48BA',
@@ -30,11 +29,10 @@ SUPPORT_WA = 'http://wa.me/6589691668'
 EMAIL_SUPPORT = 'info@bitai.app'
 WEBSITE = 'https://www.bitai.app'
 
-# ============ ENTRY MESSAGE (First Video - Recorded Webinar) ============
+# ============ ENTRY MESSAGE ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # Send the recorded webinar video (first video) with entry message
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['entry'],
@@ -48,7 +46,6 @@ It's time to upgrade to BitAl - built to analyze real-time market data and execu
         parse_mode='Markdown'
     )
     
-    # Entry buttons - Register, Download, NEXT, Support
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register my FREE BitAl account", url=REGISTER_LINK)],
         [InlineKeyboardButton("Download BitAl (iOS & Android)", url=DOWNLOAD_BITAL)],
@@ -234,7 +231,7 @@ Once completed, continue to Select Risk Profile.""",
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 ============
+# ============ STEP 7 - WITH EXACT 5 BUTTONS ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -245,6 +242,7 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass
     
+    # Send the video first
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step7'],
@@ -258,13 +256,13 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         parse_mode='Markdown'
     )
     
-    # 5 Buttons exactly as in PDF
+    # EXACT 5 BUTTONS as specified
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
-        [InlineKeyboardButton("🌐 Website https://www.bitai.app", url=WEBSITE)],
-        [InlineKeyboardButton("✉️ Email support: info@bitai.app", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("📞 Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
-        [InlineKeyboardButton("❌ Exit Conversation (close bot)", callback_data='exit')]
+        [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
+        [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
+        [InlineKeyboardButton("Email support: info@bitai.app", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
+        [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 7/7 - Setup Complete! ✅", reply_markup=keyboard)
 
@@ -291,7 +289,7 @@ def main():
     app.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
     app.add_handler(CallbackQueryHandler(handle_exit, pattern='^exit$'))
     
-    logger.info("✅ Bot is ready! First video is the recorded webinar.")
+    logger.info("✅ Bot is ready!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
