@@ -29,21 +29,68 @@ SUPPORT_WA = 'http://wa.me/6589691668'
 EMAIL_SUPPORT = 'info@bitai.app'
 WEBSITE = 'https://www.bitai.app'
 
-# ============ ENTRY MESSAGE ============
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    logger.info(f"User {chat_id} started the bot")
-    
-    await context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['entry'],
-        caption="""Welcome to BitAl by Affinity AI 🚀
+# ============ MESSAGES ============
+ENTRY_MSG = """Welcome to BitAl by Affinity AI 🚀
 
 Most crypto traders don't lose because they lack knowledge.
 
 They lose because manual trading is emotional, bot settings are messy, and execution comes too late.
 
-It's time to upgrade to BitAl - built to analyze real-time market data and execute your trades automatically, 24/7.""",
+It's time to upgrade to BitAl - built to analyze real-time market data and execute your trades automatically, 24/7."""
+
+STEP1_MSG = """Step 1/7: Register and download BitAl
+
+To start using BitAl, you need to register for your FREE BitAl account and download BitAl app. If you are referred by our BitAl user, please use their referral link to register."""
+
+STEP2_MSG = """Step 2/7: Setting up Binance Account
+
+To start using BitAl, you need a Binance account with KYC verification completed.
+
+Already have a verified Binance account? You may skip this video and continue to BitAI License Activation."""
+
+STEP3_MSG = """Step 3/7: BitAI License Activation
+
+To unlock BitAI's full auto AI trading, activate your BitAI License inside your BitAI app. Once activated, you can proceed to activate & enable your Binance Futures."""
+
+STEP4_MSG = """Step 4/7: Activate & Enable Binance Futures
+
+Before BitAI can execute, you need to activate Binance Futures inside your Binance account.
+
+Once Futures is enabled, you can continue to the next step and create your Binance API connection."""
+
+STEP5_MSG = """Step 5/7: Set Up Your API Keys
+
+Next, create your Binance API Keys and connect them to your BitAI account.
+
+This allows BitAI to analyze real-time market data and execute based on your selected risk profile.
+
+Make sure your API Keys are kept private and only connected inside the official BitAI platform."""
+
+STEP6_MSG = """Step 6/7: Transfer USDT to Binance Futures
+
+Before BitAI can execute, make sure your USDT is transferred into your own Binance Futures Wallet.
+
+This will be the capital used for BitAI's AI-driven execution based on your selected risk profile.
+
+Once completed, continue to Select Risk Profile."""
+
+STEP7_MSG = """Step 7/7: Select Your Risk Profile
+
+Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
+
+BitAI will execute according to the risk level you select.
+
+Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
+
+# ============ START ============
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    logger.info(f"User {chat_id} started")
+    
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['entry'],
+        caption=ENTRY_MSG,
         parse_mode='Markdown'
     )
     
@@ -60,7 +107,7 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 1")
+    logger.info(f"User {chat_id} at Step 1")
     
     try:
         await query.message.delete()
@@ -70,9 +117,7 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step1'],
-        caption="""Step 1/7: Register and download BitAl
-
-To start using BitAl, you need to register for your FREE BitAl account and download BitAl app. If you are referred by our BitAl user, please use their referral link to register.""",
+        caption=STEP1_MSG,
         parse_mode='Markdown'
     )
     
@@ -89,7 +134,7 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 2")
+    logger.info(f"User {chat_id} at Step 2")
     
     try:
         await query.message.delete()
@@ -99,11 +144,7 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step2'],
-        caption="""Step 2/7: Setting up Binance Account
-
-To start using BitAl, you need a Binance account with KYC verification completed.
-
-Already have a verified Binance account? You may skip this video and continue to BitAI License Activation.""",
+        caption=STEP2_MSG,
         parse_mode='Markdown'
     )
     
@@ -121,7 +162,7 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 3")
+    logger.info(f"User {chat_id} at Step 3")
     
     try:
         await query.message.delete()
@@ -131,9 +172,7 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step3'],
-        caption="""Step 3/7: BitAI License Activation
-
-To unlock BitAI's full auto AI trading, activate your BitAI License inside your BitAI app. Once activated, you can proceed to activate & enable your Binance Futures.""",
+        caption=STEP3_MSG,
         parse_mode='Markdown'
     )
     
@@ -149,7 +188,7 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 4")
+    logger.info(f"User {chat_id} at Step 4")
     
     try:
         await query.message.delete()
@@ -159,11 +198,7 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step4'],
-        caption="""Step 4/7: Activate & Enable Binance Futures
-
-Before BitAI can execute, you need to activate Binance Futures inside your Binance account.
-
-Once Futures is enabled, you can continue to the next step and create your Binance API connection.""",
+        caption=STEP4_MSG,
         parse_mode='Markdown'
     )
     
@@ -179,7 +214,7 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 5")
+    logger.info(f"User {chat_id} at Step 5")
     
     try:
         await query.message.delete()
@@ -189,13 +224,7 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step5'],
-        caption="""Step 5/7: Set Up Your API Keys
-
-Next, create your Binance API Keys and connect them to your BitAI account.
-
-This allows BitAI to analyze real-time market data and execute based on your selected risk profile.
-
-Make sure your API Keys are kept private and only connected inside the official BitAI platform.""",
+        caption=STEP5_MSG,
         parse_mode='Markdown'
     )
     
@@ -211,7 +240,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 6")
+    logger.info(f"User {chat_id} at Step 6")
     
     try:
         await query.message.delete()
@@ -221,13 +250,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step6'],
-        caption="""Step 6/7: Transfer USDT to Binance Futures
-
-Before BitAI can execute, make sure your USDT is transferred into your own Binance Futures Wallet.
-
-This will be the capital used for BitAI's AI-driven execution based on your selected risk profile.
-
-Once completed, continue to Select Risk Profile.""",
+        caption=STEP6_MSG,
         parse_mode='Markdown'
     )
     
@@ -238,48 +261,28 @@ Once completed, continue to Select Risk Profile.""",
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 - WITH EXACT 5 BUTTONS ============
+# ============ STEP 7 - WITH 5 BUTTONS ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} reached Step 7 - SENDING 5 BUTTONS")
+    logger.info(f"User {chat_id} at Step 7 - SENDING BUTTONS NOW")
     
     # Delete the previous message
     try:
         await query.message.delete()
-    except Exception as e:
-        logger.error(f"Could not delete message: {e}")
+    except:
+        pass
     
     # Send the Step 7 video
-    try:
-        await context.bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step7'],
-            caption="""Step 7/7: Select Your Risk Profile
-
-Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
-
-BitAI will execute according to the risk level you select.
-
-Once done, BitAI will start to analyze real time market data and execute your trades automatically!""",
-            parse_mode='Markdown'
-        )
-        logger.info(f"Step 7 video sent to {chat_id}")
-    except Exception as e:
-        logger.error(f"Failed to send Step 7 video: {e}")
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text="""Step 7/7: Select Your Risk Profile
-
-Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
-
-BitAI will execute according to the risk level you select.
-
-Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
-        )
+    await context.bot.send_video(
+        chat_id=chat_id,
+        video=VIDEOS['step7'],
+        caption=STEP7_MSG,
+        parse_mode='Markdown'
+    )
     
-    # Send the 5 buttons in a SEPARATE message
+    # Create the 5 buttons
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
         [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
@@ -288,15 +291,14 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
     ])
     
-    try:
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text="✅ Step 7/7 - Setup Complete!\n\nPlease select an option below:",
-            reply_markup=keyboard
-        )
-        logger.info(f"Step 7 buttons sent to {chat_id}")
-    except Exception as e:
-        logger.error(f"Failed to send Step 7 buttons: {e}")
+    # Send the buttons in a separate message
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="✅ Setup Complete! Choose an option below:",
+        reply_markup=keyboard
+    )
+    
+    logger.info(f"Step 7 buttons sent to {chat_id}")
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
