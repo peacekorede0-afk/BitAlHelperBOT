@@ -32,6 +32,7 @@ WEBSITE = 'https://www.bitai.app'
 # ============ ENTRY MESSAGE ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
+    logger.info(f"User {chat_id} started the bot")
     
     await context.bot.send_video(
         chat_id=chat_id,
@@ -59,6 +60,7 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 1")
     
     try:
         await query.message.delete()
@@ -87,6 +89,7 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 2")
     
     try:
         await query.message.delete()
@@ -118,6 +121,7 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 3")
     
     try:
         await query.message.delete()
@@ -145,6 +149,7 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 4")
     
     try:
         await query.message.delete()
@@ -174,6 +179,7 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 5")
     
     try:
         await query.message.delete()
@@ -205,6 +211,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 6")
     
     try:
         await query.message.delete()
@@ -236,26 +243,41 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} reached Step 7 - SENDING 5 BUTTONS")
     
     # Delete the previous message
     try:
         await query.message.delete()
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Could not delete message: {e}")
     
     # Send the Step 7 video
-    await context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step7'],
-        caption="""Step 7/7: Select Your Risk Profile
+    try:
+        await context.bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step7'],
+            caption="""Step 7/7: Select Your Risk Profile
 
 Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
 
 BitAI will execute according to the risk level you select.
 
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!""",
-        parse_mode='Markdown'
-    )
+            parse_mode='Markdown'
+        )
+        logger.info(f"Step 7 video sent to {chat_id}")
+    except Exception as e:
+        logger.error(f"Failed to send Step 7 video: {e}")
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="""Step 7/7: Select Your Risk Profile
+
+Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
+
+BitAI will execute according to the risk level you select.
+
+Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
+        )
     
     # Send the 5 buttons in a SEPARATE message
     keyboard = InlineKeyboardMarkup([
@@ -265,11 +287,16 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
         [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
     ])
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text="✅ Step 7/7 - Setup Complete!\n\nChoose an option below:",
-        reply_markup=keyboard
-    )
+    
+    try:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="✅ Step 7/7 - Setup Complete!\n\nPlease select an option below:",
+            reply_markup=keyboard
+        )
+        logger.info(f"Step 7 buttons sent to {chat_id}")
+    except Exception as e:
+        logger.error(f"Failed to send Step 7 buttons: {e}")
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
