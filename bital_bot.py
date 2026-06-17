@@ -237,12 +237,13 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     chat_id = query.message.chat.id
     
+    # Delete the previous message
     try:
         await query.message.delete()
     except:
         pass
     
-    # Send the video first
+    # Send the Step 7 video
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step7'],
@@ -256,7 +257,7 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         parse_mode='Markdown'
     )
     
-    # EXACT 5 BUTTONS as specified
+    # Send the 5 buttons in a SEPARATE message
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
         [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
@@ -264,7 +265,11 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
         [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 7/7 - Setup Complete! ✅", reply_markup=keyboard)
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="✅ Step 7/7 - Setup Complete!\n\nChoose an option below:",
+        reply_markup=keyboard
+    )
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
