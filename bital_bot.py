@@ -54,7 +54,7 @@ It's time to upgrade to BitAl - built to analyze real-time market data and execu
         [InlineKeyboardButton("➡️ NEXT", callback_data='step1')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="👇 Choose an option below:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
 # ============ STEP 1 ============
 async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -62,13 +62,11 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     chat_id = query.message.chat.id
     
-    # Delete previous message
     try:
         await query.message.delete()
     except:
         pass
     
-    # Send Step 1 video with message as caption
     await context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step1'],
@@ -78,14 +76,13 @@ To start using BitAl, you need to register for your FREE BitAl account and downl
         parse_mode='Markdown'
     )
     
-    # Step 1 buttons - Register, Download, NEXT, Support
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
         [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
         [InlineKeyboardButton("➡️ NEXT", callback_data='step2')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 1/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
 
 # ============ STEP 2 ============
 async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -111,12 +108,12 @@ Already have a verified Binance account? You may skip this video and continue to
     
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Create FREE Binance account", url=BINANCE_REGISTER)],
-        [InlineKeyboardButton("Download Binance", url=BINANCE_DOWNLOAD)],
+        [InlineKeyboardButton("Download Binance (iOS & Android)", url=BINANCE_DOWNLOAD)],
         [InlineKeyboardButton("➡️ NEXT", callback_data='step3')],
         [InlineKeyboardButton("◀️ BACK", callback_data='step1')],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)]
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 2/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
 
 # ============ STEP 3 ============
 async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -141,9 +138,9 @@ To unlock BitAI's full auto AI trading, activate your BitAI License inside your 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➡️ NEXT", callback_data='step4')],
         [InlineKeyboardButton("◀️ BACK", callback_data='step2')],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)]
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 3/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
 
 # ============ STEP 4 ============
 async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -170,9 +167,9 @@ Once Futures is enabled, you can continue to the next step and create your Binan
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➡️ NEXT", callback_data='step5')],
         [InlineKeyboardButton("◀️ BACK", callback_data='step3')],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)]
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 4/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
 
 # ============ STEP 5 ============
 async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -201,9 +198,9 @@ Make sure your API Keys are kept private and only connected inside the official 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➡️ NEXT", callback_data='step6')],
         [InlineKeyboardButton("◀️ BACK", callback_data='step4')],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)]
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 5/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
 
 # ============ STEP 6 ============
 async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -232,9 +229,9 @@ Once completed, continue to Select Risk Profile.""",
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➡️ NEXT", callback_data='step7')],
         [InlineKeyboardButton("◀️ BACK", callback_data='step5')],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)]
+        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 6/7 - Choose:", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
 # ============ STEP 7 ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -260,14 +257,15 @@ Once done, BitAI will start to analyze real time market data and execute your tr
         parse_mode='Markdown'
     )
     
+    # 5 Buttons exactly as in PDF
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ BACK", callback_data='step6')],
-        [InlineKeyboardButton("Website", url=WEBSITE)],
-        [InlineKeyboardButton("Email", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("Support", url=SUPPORT_WA)],
-        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
+        [InlineKeyboardButton("◀️ Back to previous step", callback_data='step6')],
+        [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
+        [InlineKeyboardButton("✉️ Email support", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("📞 Contact support", url=SUPPORT_WA)],
+        [InlineKeyboardButton("❌ Exit Conversation", callback_data='exit')]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 7/7 - Complete! ✅", reply_markup=keyboard)
+    await context.bot.send_message(chat_id=chat_id, text="Step 7/7 - Setup Complete! ✅", reply_markup=keyboard)
 
 # ============ EXIT ============
 async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
