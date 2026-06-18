@@ -1,12 +1,20 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ============ GET BOT TOKEN WITH ERROR CHECKING ============
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+
+if not BOT_TOKEN:
+    logger.error("❌ BOT_TOKEN environment variable not set!")
+    logger.error("Please set BOT_TOKEN in Railway environment variables")
+    exit(1)
+
+logger.info(f"✅ Bot token loaded successfully (length: {len(BOT_TOKEN)})")
 
 # ============ YOUR FILE_IDS ============
 VIDEOS = {
@@ -83,10 +91,11 @@ BitAI will execute according to the risk level you select.
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
 # ============ START ============
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
+    logger.info(f"User {chat_id} started the bot")
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['entry'],
         caption=ENTRY_MSG,
@@ -99,20 +108,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("➡️ NEXT", callback_data='step1')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
 # ============ STEP 1 ============
-async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step1(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 1")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step1'],
         caption=STEP1_MSG,
@@ -125,20 +135,21 @@ async def step1(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("➡️ NEXT", callback_data='step2')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
 
 # ============ STEP 2 ============
-async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step2(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 2")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step2'],
         caption=STEP2_MSG,
@@ -152,20 +163,21 @@ async def step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("◀️ BACK", callback_data='step1')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
 
 # ============ STEP 3 ============
-async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step3(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 3")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step3'],
         caption=STEP3_MSG,
@@ -177,20 +189,21 @@ async def step3(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("◀️ BACK", callback_data='step2')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
 
 # ============ STEP 4 ============
-async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step4(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 4")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step4'],
         caption=STEP4_MSG,
@@ -202,20 +215,21 @@ async def step4(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("◀️ BACK", callback_data='step3')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
 
 # ============ STEP 5 ============
-async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step5(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 5")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step5'],
         caption=STEP5_MSG,
@@ -227,20 +241,21 @@ async def step5(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("◀️ BACK", callback_data='step4')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
 
 # ============ STEP 6 ============
-async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step6(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 6")
     
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step6'],
         caption=STEP6_MSG,
@@ -252,76 +267,83 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("◀️ BACK", callback_data='step5')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
+    context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
 # ============ STEP 7 - WITH 5 BUTTONS ============
-async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def step7(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     chat_id = query.message.chat.id
+    logger.info(f"User {chat_id} at Step 7 - SENDING 5 BUTTONS")
     
     # Delete previous message
     try:
-        await query.message.delete()
+        query.message.delete()
     except:
         pass
     
     # Send Step 7 video
-    await context.bot.send_video(
+    context.bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['step7'],
         caption=STEP7_MSG,
         parse_mode='Markdown'
     )
     
-    # ============ THE 5 BUTTONS - SIMPLE AND SHORT ============
-    # Each button text is under 20 characters - definitely under 64-char limit!
+    # THE 5 BUTTONS - Short and simple
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ Back", callback_data='step6')],
+        [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
         [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
         [InlineKeyboardButton("✉️ Email", url=f"mailto:{EMAIL_SUPPORT}")],
         [InlineKeyboardButton("📞 WhatsApp", url=SUPPORT_WA)],
         [InlineKeyboardButton("❌ Exit", callback_data='exit')]
     ])
     
-    # Send the buttons with the full text in the message
-    await context.bot.send_message(
+    context.bot.send_message(
         chat_id=chat_id,
         text="✅ Step 7/7 - Setup Complete!\n\n"
-             "🔹 Back to previous step (Transferring USDT to Binance Futures)\n"
-             "🔹 Website: https://www.bitai.app\n"
-             "🔹 Email support: info@bitai.app\n"
-             "🔹 Contact support: http://wa.me/6589691668\n"
-             "🔹 Exit Conversation (close bot)\n\n"
-             "Click a button below:",
+             "5 Buttons:\n"
+             "1. Back to previous step (Transferring USDT to Binance Futures)\n"
+             "2. Website https://www.bitai.app\n"
+             "3. Email support: info@bitai.app\n"
+             "4. Contact support http://wa.me/6589691668\n"
+             "5. Exit Conversation (close bot)",
         reply_markup=keyboard
     )
+    logger.info(f"Step 7 buttons sent to {chat_id}")
 
 # ============ EXIT ============
-async def handle_exit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def exit_handler(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
-    await query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
+    query.answer()
+    query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
 
 # ============ MAIN ============
 def main():
     logger.info("🚀 Starting BitAl Bot...")
+    logger.info(f"Bot token: {BOT_TOKEN[:10]}...")  # Log first 10 chars for debugging
     
-    app = Application.builder().token(BOT_TOKEN).build()
-    
-    app.add_handler(CommandHandler("start", start))
-    
-    app.add_handler(CallbackQueryHandler(step1, pattern='^step1$'))
-    app.add_handler(CallbackQueryHandler(step2, pattern='^step2$'))
-    app.add_handler(CallbackQueryHandler(step3, pattern='^step3$'))
-    app.add_handler(CallbackQueryHandler(step4, pattern='^step4$'))
-    app.add_handler(CallbackQueryHandler(step5, pattern='^step5$'))
-    app.add_handler(CallbackQueryHandler(step6, pattern='^step6$'))
-    app.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
-    app.add_handler(CallbackQueryHandler(handle_exit, pattern='^exit$'))
-    
-    logger.info("✅ Bot is ready!")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    try:
+        updater = Updater(token=BOT_TOKEN, use_context=True)
+        dp = updater.dispatcher
+        
+        dp.add_handler(CommandHandler("start", start))
+        
+        dp.add_handler(CallbackQueryHandler(step1, pattern='^step1$'))
+        dp.add_handler(CallbackQueryHandler(step2, pattern='^step2$'))
+        dp.add_handler(CallbackQueryHandler(step3, pattern='^step3$'))
+        dp.add_handler(CallbackQueryHandler(step4, pattern='^step4$'))
+        dp.add_handler(CallbackQueryHandler(step5, pattern='^step5$'))
+        dp.add_handler(CallbackQueryHandler(step6, pattern='^step6$'))
+        dp.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
+        dp.add_handler(CallbackQueryHandler(exit_handler, pattern='^exit$'))
+        
+        logger.info("✅ Bot is ready! Waiting for messages...")
+        updater.start_polling()
+        updater.idle()
+    except Exception as e:
+        logger.error(f"❌ Bot failed to start: {e}")
+        raise
 
 if __name__ == '__main__':
     main()
