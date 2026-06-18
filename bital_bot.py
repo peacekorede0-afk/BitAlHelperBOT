@@ -6,15 +6,15 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ============ GET BOT TOKEN WITH ERROR CHECKING ============
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+# ============ BOT TOKEN ============
+# Your actual token from BotFather
+BOT_TOKEN = '8984670041:AAGDUQNlxD4UKJU7Uk6Yqot1KWiqHDYlGeU'
 
 if not BOT_TOKEN:
-    logger.error("❌ BOT_TOKEN environment variable not set!")
-    logger.error("Please set BOT_TOKEN in Railway environment variables")
+    logger.error("❌ BOT_TOKEN not set!")
     exit(1)
 
-logger.info(f"✅ Bot token loaded successfully (length: {len(BOT_TOKEN)})")
+logger.info(f"✅ Bot token loaded")
 
 # ============ YOUR FILE_IDS ============
 VIDEOS = {
@@ -93,7 +93,6 @@ Once done, BitAI will start to analyze real time market data and execute your tr
 # ============ START ============
 def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
-    logger.info(f"User {chat_id} started the bot")
     
     context.bot.send_video(
         chat_id=chat_id,
@@ -115,7 +114,6 @@ def step1(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 1")
     
     try:
         query.message.delete()
@@ -142,7 +140,6 @@ def step2(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 2")
     
     try:
         query.message.delete()
@@ -170,7 +167,6 @@ def step3(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 3")
     
     try:
         query.message.delete()
@@ -196,7 +192,6 @@ def step4(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 4")
     
     try:
         query.message.delete()
@@ -222,7 +217,6 @@ def step5(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 5")
     
     try:
         query.message.delete()
@@ -248,7 +242,6 @@ def step6(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 6")
     
     try:
         query.message.delete()
@@ -274,7 +267,6 @@ def step7(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     chat_id = query.message.chat.id
-    logger.info(f"User {chat_id} at Step 7 - SENDING 5 BUTTONS")
     
     # Delete previous message
     try:
@@ -290,7 +282,7 @@ def step7(update: Update, context: CallbackContext):
         parse_mode='Markdown'
     )
     
-    # THE 5 BUTTONS - Short and simple
+    # THE 5 BUTTONS
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
         [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
@@ -310,7 +302,6 @@ def step7(update: Update, context: CallbackContext):
              "5. Exit Conversation (close bot)",
         reply_markup=keyboard
     )
-    logger.info(f"Step 7 buttons sent to {chat_id}")
 
 # ============ EXIT ============
 def exit_handler(update: Update, context: CallbackContext):
@@ -321,7 +312,6 @@ def exit_handler(update: Update, context: CallbackContext):
 # ============ MAIN ============
 def main():
     logger.info("🚀 Starting BitAl Bot...")
-    logger.info(f"Bot token: {BOT_TOKEN[:10]}...")  # Log first 10 chars for debugging
     
     try:
         updater = Updater(token=BOT_TOKEN, use_context=True)
