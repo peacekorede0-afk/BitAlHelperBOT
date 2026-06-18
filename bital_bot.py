@@ -254,7 +254,7 @@ async def step6(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
 
-# ============ STEP 7 - EXACT BUTTONS WITH FULL TEXT ============
+# ============ STEP 7 - WITH 5 BUTTONS ============
 async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -274,18 +274,26 @@ async def step7(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     
-    # 5 Buttons with full descriptive text and correct links
+    # ============ THE 5 BUTTONS - SIMPLE AND SHORT ============
+    # Each button text is under 20 characters - definitely under 64-char limit!
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Back to previous step (Transferring USDT to Binance Futures)", callback_data='step6')],
-        [InlineKeyboardButton("Website https://www.bitai.app", url=WEBSITE)],
-        [InlineKeyboardButton("Email support: info@bitai.app", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("Contact support http://wa.me/6589691668", url=SUPPORT_WA)],
-        [InlineKeyboardButton("Exit Conversation (close bot)", callback_data='exit')]
+        [InlineKeyboardButton("◀️ Back", callback_data='step6')],
+        [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
+        [InlineKeyboardButton("✉️ Email", url=f"mailto:{EMAIL_SUPPORT}")],
+        [InlineKeyboardButton("📞 WhatsApp", url=SUPPORT_WA)],
+        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
     ])
     
+    # Send the buttons with the full text in the message
     await context.bot.send_message(
         chat_id=chat_id,
-        text="✅ Step 7/7 - Setup Complete!\n\nSelect an option:",
+        text="✅ Step 7/7 - Setup Complete!\n\n"
+             "🔹 Back to previous step (Transferring USDT to Binance Futures)\n"
+             "🔹 Website: https://www.bitai.app\n"
+             "🔹 Email support: info@bitai.app\n"
+             "🔹 Contact support: http://wa.me/6589691668\n"
+             "🔹 Exit Conversation (close bot)\n\n"
+             "Click a button below:",
         reply_markup=keyboard
     )
 
