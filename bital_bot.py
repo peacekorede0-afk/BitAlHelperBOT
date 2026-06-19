@@ -6,15 +6,15 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ============ BOT TOKEN ============
-# Your actual token from BotFather
-BOT_TOKEN = '8984670041:AAGDUQNlxD4UKJU7Uk6Yqot1KWiqHDYlGeU'
+# ============ GET BOT TOKEN ============
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 if not BOT_TOKEN:
-    logger.error("❌ BOT_TOKEN not set!")
+    logger.error("❌ BOT_TOKEN not found in environment variables!")
+    logger.error("Please add BOT_TOKEN to Railway Environment Variables")
     exit(1)
 
-logger.info(f"✅ Bot token loaded")
+logger.info(f"✅ Bot token loaded (length: {len(BOT_TOKEN)})")
 
 # ============ YOUR FILE_IDS ============
 VIDEOS = {
@@ -314,9 +314,11 @@ def main():
     logger.info("🚀 Starting BitAl Bot...")
     
     try:
-        updater = Updater(token=BOT_TOKEN, use_context=True)
+        # CORRECT SYNTAX FOR VERSION 13.15
+        updater = Updater(BOT_TOKEN, use_context=True)
         dp = updater.dispatcher
         
+        # Add handlers
         dp.add_handler(CommandHandler("start", start))
         
         dp.add_handler(CallbackQueryHandler(step1, pattern='^step1$'))
@@ -329,8 +331,11 @@ def main():
         dp.add_handler(CallbackQueryHandler(exit_handler, pattern='^exit$'))
         
         logger.info("✅ Bot is ready! Waiting for messages...")
+        
+        # Start polling
         updater.start_polling()
         updater.idle()
+        
     except Exception as e:
         logger.error(f"❌ Bot failed to start: {e}")
         raise
