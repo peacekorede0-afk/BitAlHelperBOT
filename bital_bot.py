@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,11 +10,10 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 if not BOT_TOKEN:
-    logger.error("❌ BOT_TOKEN not found in environment variables!")
-    logger.error("Please add BOT_TOKEN to Railway Environment Variables")
+    logger.error("❌ BOT_TOKEN not found!")
     exit(1)
 
-logger.info(f"✅ Bot token loaded (length: {len(BOT_TOKEN)})")
+logger.info(f"✅ Bot token loaded")
 
 # ============ YOUR FILE_IDS ============
 VIDEOS = {
@@ -90,11 +89,11 @@ BitAI will execute according to the risk level you select.
 
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
-# ============ START ============
-def start(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
+# ============ HANDLERS ============
+def start(bot, update):
+    chat_id = update.message.chat_id
     
-    context.bot.send_video(
+    bot.send_video(
         chat_id=chat_id,
         video=VIDEOS['entry'],
         caption=ENTRY_MSG,
@@ -107,232 +106,148 @@ def start(update: Update, context: CallbackContext):
         [InlineKeyboardButton("➡️ NEXT", callback_data='step1')],
         [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
     ])
-    context.bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
+    bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
 
-# ============ STEP 1 ============
-def step1(update: Update, context: CallbackContext):
+def button_handler(bot, update):
     query = update.callback_query
     query.answer()
-    chat_id = query.message.chat.id
+    chat_id = query.message.chat_id
+    data = query.data
     
     try:
         query.message.delete()
     except:
         pass
     
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step1'],
-        caption=STEP1_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
-        [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step2')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
-
-# ============ STEP 2 ============
-def step2(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step2'],
-        caption=STEP2_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Create FREE Binance account", url=BINANCE_REGISTER)],
-        [InlineKeyboardButton("Download Binance (iOS & Android)", url=BINANCE_DOWNLOAD)],
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step3')],
-        [InlineKeyboardButton("◀️ BACK", callback_data='step1')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
-
-# ============ STEP 3 ============
-def step3(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step3'],
-        caption=STEP3_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step4')],
-        [InlineKeyboardButton("◀️ BACK", callback_data='step2')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
-
-# ============ STEP 4 ============
-def step4(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step4'],
-        caption=STEP4_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step5')],
-        [InlineKeyboardButton("◀️ BACK", callback_data='step3')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
-
-# ============ STEP 5 ============
-def step5(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step5'],
-        caption=STEP5_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step6')],
-        [InlineKeyboardButton("◀️ BACK", callback_data='step4')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
-
-# ============ STEP 6 ============
-def step6(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step6'],
-        caption=STEP6_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step7')],
-        [InlineKeyboardButton("◀️ BACK", callback_data='step5')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    context.bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
-
-# ============ STEP 7 - WITH 5 BUTTONS ============
-def step7(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat.id
-    
-    # Delete previous message
-    try:
-        query.message.delete()
-    except:
-        pass
-    
-    # Send Step 7 video
-    context.bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['step7'],
-        caption=STEP7_MSG,
-        parse_mode='Markdown'
-    )
-    
-    # THE 5 BUTTONS
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
-        [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
-        [InlineKeyboardButton("✉️ Email", url=f"mailto:{EMAIL_SUPPORT}")],
-        [InlineKeyboardButton("📞 WhatsApp", url=SUPPORT_WA)],
-        [InlineKeyboardButton("❌ Exit", callback_data='exit')]
-    ])
-    
-    context.bot.send_message(
-        chat_id=chat_id,
-        text="✅ Step 7/7 - Setup Complete!\n\n"
-             "5 Buttons:\n"
-             "1. Back to previous step (Transferring USDT to Binance Futures)\n"
-             "2. Website https://www.bitai.app\n"
-             "3. Email support: info@bitai.app\n"
-             "4. Contact support http://wa.me/6589691668\n"
-             "5. Exit Conversation (close bot)",
-        reply_markup=keyboard
-    )
-
-# ============ EXIT ============
-def exit_handler(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-    query.edit_message_text("👋 Conversation ended. Send /start to begin again.")
+    if data == 'step1':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step1'],
+            caption=STEP1_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
+            [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step2')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
+        
+    elif data == 'step2':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step2'],
+            caption=STEP2_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Create FREE Binance account", url=BINANCE_REGISTER)],
+            [InlineKeyboardButton("Download Binance (iOS & Android)", url=BINANCE_DOWNLOAD)],
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step3')],
+            [InlineKeyboardButton("◀️ BACK", callback_data='step1')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
+        
+    elif data == 'step3':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step3'],
+            caption=STEP3_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step4')],
+            [InlineKeyboardButton("◀️ BACK", callback_data='step2')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
+        
+    elif data == 'step4':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step4'],
+            caption=STEP4_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step5')],
+            [InlineKeyboardButton("◀️ BACK", callback_data='step3')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
+        
+    elif data == 'step5':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step5'],
+            caption=STEP5_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step6')],
+            [InlineKeyboardButton("◀️ BACK", callback_data='step4')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
+        
+    elif data == 'step6':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step6'],
+            caption=STEP6_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡️ NEXT", callback_data='step7')],
+            [InlineKeyboardButton("◀️ BACK", callback_data='step5')],
+            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
+        ])
+        bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
+        
+    elif data == 'step7':
+        bot.send_video(
+            chat_id=chat_id,
+            video=VIDEOS['step7'],
+            caption=STEP7_MSG,
+            parse_mode='Markdown'
+        )
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
+            [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
+            [InlineKeyboardButton("✉️ Email", url=f"mailto:{EMAIL_SUPPORT}")],
+            [InlineKeyboardButton("📞 WhatsApp", url=SUPPORT_WA)],
+            [InlineKeyboardButton("❌ Exit", callback_data='exit')]
+        ])
+        bot.send_message(
+            chat_id=chat_id,
+            text="✅ Step 7/7 - Setup Complete!\n\n"
+                 "5 Buttons:\n"
+                 "1. Back to previous step (Transferring USDT to Binance Futures)\n"
+                 "2. Website https://www.bitai.app\n"
+                 "3. Email support: info@bitai.app\n"
+                 "4. Contact support http://wa.me/6589691668\n"
+                 "5. Exit Conversation (close bot)",
+            reply_markup=keyboard
+        )
+        
+    elif data == 'exit':
+        bot.send_message(chat_id=chat_id, text="👋 Conversation ended. Send /start to begin again.")
 
 # ============ MAIN ============
 def main():
     logger.info("🚀 Starting BitAl Bot...")
     
     try:
-        # CORRECT SYNTAX FOR VERSION 13.15
-        updater = Updater(BOT_TOKEN, use_context=True)
+        # Simple Updater without any arguments
+        updater = Updater(BOT_TOKEN)
         dp = updater.dispatcher
         
-        # Add handlers
         dp.add_handler(CommandHandler("start", start))
-        
-        dp.add_handler(CallbackQueryHandler(step1, pattern='^step1$'))
-        dp.add_handler(CallbackQueryHandler(step2, pattern='^step2$'))
-        dp.add_handler(CallbackQueryHandler(step3, pattern='^step3$'))
-        dp.add_handler(CallbackQueryHandler(step4, pattern='^step4$'))
-        dp.add_handler(CallbackQueryHandler(step5, pattern='^step5$'))
-        dp.add_handler(CallbackQueryHandler(step6, pattern='^step6$'))
-        dp.add_handler(CallbackQueryHandler(step7, pattern='^step7$'))
-        dp.add_handler(CallbackQueryHandler(exit_handler, pattern='^exit$'))
+        dp.add_handler(CallbackQueryHandler(button_handler))
         
         logger.info("✅ Bot is ready! Waiting for messages...")
-        
-        # Start polling
         updater.start_polling()
         updater.idle()
         
