@@ -110,16 +110,38 @@ def send_video(chat_id, video_id, caption):
         logger.error(f"Error sending video: {e}")
         return None
 
-def send_message(chat_id, text, keyboard=None):
-    """Send message with optional keyboard"""
+def send_message_with_buttons(chat_id, text, buttons):
+    """Send message with inline keyboard buttons"""
+    url = f"{API_URL}/sendMessage"
+    
+    # Format the keyboard correctly
+    keyboard = {
+        'inline_keyboard': buttons
+    }
+    
+    data = {
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': 'Markdown',
+        'reply_markup': json.dumps(keyboard)
+    }
+    
+    try:
+        response = requests.post(url, data=data, timeout=30)
+        logger.info(f"Sent message with buttons to {chat_id}")
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error sending message with buttons: {e}")
+        return None
+
+def send_message(chat_id, text):
+    """Send simple message"""
     url = f"{API_URL}/sendMessage"
     data = {
         'chat_id': chat_id,
         'text': text,
         'parse_mode': 'Markdown'
     }
-    if keyboard:
-        data['reply_markup'] = json.dumps(keyboard)
     try:
         response = requests.post(url, data=data, timeout=30)
         return response.json()
@@ -127,12 +149,26 @@ def send_message(chat_id, text, keyboard=None):
         logger.error(f"Error sending message: {e}")
         return None
 
-def send_keyboard(chat_id, text, buttons):
-    """Send message with inline keyboard"""
-    keyboard = {
-        'inline_keyboard': buttons
+def delete_message(chat_id, message_id):
+    """Delete a message"""
+    url = f"{API_URL}/deleteMessage"
+    data = {
+        'chat_id': chat_id,
+        'message_id': message_id
     }
-    return send_message(chat_id, text, keyboard)
+    try:
+        requests.post(url, data=data, timeout=30)
+    except Exception as e:
+        logger.error(f"Error deleting message: {e}")
+
+def answer_callback(callback_id):
+    """Answer callback query"""
+    url = f"{API_URL}/answerCallbackQuery"
+    data = {'callback_query_id': callback_id}
+    try:
+        requests.post(url, data=data, timeout=30)
+    except Exception as e:
+        logger.error(f"Error answering callback: {e}")
 
 # ============ HANDLE UPDATES ============
 def handle_update(update):
@@ -154,7 +190,7 @@ def handle_update(update):
                     [{"text": "➡️ NEXT", "callback_data": "step1"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Choose an option:", buttons)
+                send_message_with_buttons(chat_id, "Choose an option:", buttons)
         
         # Handle button clicks
         elif 'callback_query' in update:
@@ -162,14 +198,13 @@ def handle_update(update):
             chat_id = query['message']['chat']['id']
             data = query['data']
             message_id = query['message']['message_id']
+            callback_id = query['id']
             
             # Answer callback query
-            url = f"{API_URL}/answerCallbackQuery"
-            requests.post(url, data={'callback_query_id': query['id']})
+            answer_callback(callback_id)
             
             # Delete previous message
-            url = f"{API_URL}/deleteMessage"
-            requests.post(url, data={'chat_id': chat_id, 'message_id': message_id})
+            delete_message(chat_id, message_id)
             
             if data == 'step1':
                 send_video(chat_id, VIDEOS['step1'], STEP1_MSG)
@@ -179,7 +214,7 @@ def handle_update(update):
                     [{"text": "➡️ NEXT", "callback_data": "step2"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 1/7", buttons)
+                send_message_with_buttons(chat_id, "Step 1/7", buttons)
                 
             elif data == 'step2':
                 send_video(chat_id, VIDEOS['step2'], STEP2_MSG)
@@ -190,7 +225,7 @@ def handle_update(update):
                     [{"text": "◀️ BACK", "callback_data": "step1"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 2/7", buttons)
+                send_message_with_buttons(chat_id, "Step 2/7", buttons)
                 
             elif data == 'step3':
                 send_video(chat_id, VIDEOS['step3'], STEP3_MSG)
@@ -199,7 +234,7 @@ def handle_update(update):
                     [{"text": "◀️ BACK", "callback_data": "step2"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 3/7", buttons)
+                send_message_with_buttons(chat_id, "Step 3/7", buttons)
                 
             elif data == 'step4':
                 send_video(chat_id, VIDEOS['step4'], STEP4_MSG)
@@ -208,7 +243,7 @@ def handle_update(update):
                     [{"text": "◀️ BACK", "callback_data": "step3"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 4/7", buttons)
+                send_message_with_buttons(chat_id, "Step 4/7", buttons)
                 
             elif data == 'step5':
                 send_video(chat_id, VIDEOS['step5'], STEP5_MSG)
@@ -217,7 +252,7 @@ def handle_update(update):
                     [{"text": "◀️ BACK", "callback_data": "step4"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 5/7", buttons)
+                send_message_with_buttons(chat_id, "Step 5/7", buttons)
                 
             elif data == 'step6':
                 send_video(chat_id, VIDEOS['step6'], STEP6_MSG)
@@ -226,18 +261,22 @@ def handle_update(update):
                     [{"text": "◀️ BACK", "callback_data": "step5"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
                 ]
-                send_keyboard(chat_id, "Step 6/7", buttons)
+                send_message_with_buttons(chat_id, "Step 6/7", buttons)
                 
             elif data == 'step7':
+                # Send Step 7 video
                 send_video(chat_id, VIDEOS['step7'], STEP7_MSG)
+                
+                # Send the 5 buttons as a separate message
                 buttons = [
-                    [{"text": "◀️ Back to Step 6", "callback_data": "step6"}],
-                    [{"text": "🌐 Website", "url": WEBSITE}],
-                    [{"text": "✉️ Email", "url": f"mailto:{EMAIL_SUPPORT}"}],
-                    [{"text": "📞 WhatsApp", "url": SUPPORT_WA}],
-                    [{"text": "❌ Exit", "callback_data": "exit"}]
+                    [{"text": "◀️ Back to previous step (Transferring USDT to Binance Futures)", "callback_data": "step6"}],
+                    [{"text": "🌐 Website https://www.bitai.app", "url": WEBSITE}],
+                    [{"text": "✉️ Email support: info@bitai.app", "url": f"mailto:{EMAIL_SUPPORT}"}],
+                    [{"text": "📞 Contact support http://wa.me/6589691668", "url": SUPPORT_WA}],
+                    [{"text": "❌ Exit Conversation (close bot)", "callback_data": "exit"}]
                 ]
-                send_keyboard(
+                
+                send_message_with_buttons(
                     chat_id,
                     "✅ Step 7/7 - Setup Complete!\n\n"
                     "5 Buttons:\n"
@@ -259,14 +298,11 @@ def handle_update(update):
 def main():
     logger.info("🚀 Starting BitAl Bot...")
     
-    # Set webhook (or use polling)
     last_update_id = 0
-    
     logger.info("✅ Bot is ready! Waiting for messages...")
     
     while True:
         try:
-            # Get updates
             url = f"{API_URL}/getUpdates"
             params = {
                 'offset': last_update_id + 1,
