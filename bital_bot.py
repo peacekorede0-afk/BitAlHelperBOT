@@ -1,25 +1,14 @@
-import os
-import logging
 import requests
 import json
-import time
+import os
+from flask import Flask, request
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+# ==================== CONFIGURATION ====================
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
+BASE_URL = f'https://api.telegram.org/bot{TOKEN}'
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
 
-# ============ GET BOT TOKEN ============
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-
-if not BOT_TOKEN:
-    logger.error("❌ BOT_TOKEN not found!")
-    exit(1)
-
-logger.info(f"✅ Bot token loaded")
-
-# ============ TELEGRAM API URL ============
-API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-
-# ============ YOUR FILE_IDS ============
+# ==================== VIDEO FILE IDs ====================
 VIDEOS = {
     'entry': 'BAACAgQAAxkBAAMYai3-z5ZB7JVZa9przLZIZX5rjUIAArwhAAJdNnBRRGw2cWcHYMA8BA',
     'step1': 'BAACAgQAAxkBAAMaai3_GuiDvvO1PpJlFlZpUro9yj0AAr0hAAJdNnBRd5_eEgx7yLA8BA',
@@ -31,273 +20,438 @@ VIDEOS = {
     'step7': 'BAACAgQAAxkBAAMmai3_vwlSsuChBpj6ZSw1rw8tpQUAAsQhAAJdNnBRAAEC-ApFvpvMPAQ'
 }
 
-# ============ LINKS ============
-REGISTER_LINK = 'https://app.bitai.app/h5/#/pages/sign/sign?invite=888'
-DOWNLOAD_BITAL = 'https://fr.bitai.app/app.html'
-BINANCE_REGISTER = 'https://accounts.binance.com/en/register?ref=1154159582'
-BINANCE_DOWNLOAD = 'https://www.binance.com/en/download'
-SUPPORT_WA = 'http://wa.me/6589691668'
-EMAIL_SUPPORT = 'info@bitai.app'
-WEBSITE = 'https://www.bitai.app'
+# ==================== LINKS ====================
+LINKS = {
+    'register': 'https://app.bitai.app/h5/#/pages/sign/sign?invite=888',
+    'download_bital': 'https://fr.bitai.app/app.html',
+    'binance_register': 'https://accounts.binance.com/en/register?ref=1154159582',
+    'binance_download': 'https://www.binance.com/en/download',
+    'support_whatsapp': 'http://wa.me/6589691668',
+    'email': 'info@bitai.app',
+    'website': 'https://www.bitai.app'
+}
 
-# ============ MESSAGES ============
-ENTRY_MSG = """Welcome to BitAl by Affinity AI 🚀
+# ==================== MESSAGES ====================
+MESSAGES = {
+    'entry': (
+        "👋 *Welcome to BitAl Helper Bot!*\\n\\n"
+        "I'm here to guide you through setting up your *BitAl AI Trading Bot* in 7 simple steps.\\n\\n"
+        "🎥 Watch the welcome video above, then click the buttons below to get started!"
+    ),
+    'step1': (
+        "📱 *Step 1/7: Register and Download BitAl*\\n\\n"
+        "1️⃣ Click *Register* to create your FREE BitAl account\\n"
+        "2️⃣ Click *Download* to install BitAl on iOS or Android\\n\\n"
+        "🎥 Watch the video above for a visual guide!"
+    ),
+    'step2': (
+        "🏦 *Step 2/7: Setting Up Your Binance Account*\\n\\n"
+        "1️⃣ Click *Create Binance* to register your account\\n"
+        "2️⃣ Click *Download Binance* to install the app\\n\\n"
+        "🎥 Watch the video above for detailed instructions!"
+    ),
+    'step3': (
+        "🔑 *Step 3/7: BitAl License Activation*\\n\\n"
+        "Activate your BitAl license to unlock full trading capabilities.\\n\\n"
+        "🎥 Watch the video above to see how it's done!"
+    ),
+    'step4': (
+        "⚡ *Step 4/7: Activate & Enable Binance Futures*\\n\\n"
+        "Enable Futures trading on your Binance account.\\n\\n"
+        "🎥 Watch the video above for the step-by-step process!"
+    ),
+    'step5': (
+        "🔐 *Step 5/7: Set Up Your API Keys*\\n\\n"
+        "Connect BitAl to Binance using API keys for secure trading.\\n\\n"
+        "🎥 Watch the video above to learn how to generate and configure your API keys!"
+    ),
+    'step6': (
+        "💰 *Step 6/7: Transfer USDT to Binance Futures*\\n\\n"
+        "Fund your Binance Futures wallet with USDT to start trading.\\n\\n"
+        "🎥 Watch the video above for the transfer process!"
+    ),
+    'step7': (
+        "✅ *Step 7/7 - Setup Complete!*\\n\\n"
+        "🎉 Congratulations! You've completed all 7 setup steps!\\n\\n"
+        "Your BitAl bot is now ready to trade. Use the buttons below:"
+    )
+}
 
-Most crypto traders don't lose because they lack knowledge.
+# ==================== TELEGRAM API HELPERS ====================
 
-They lose because manual trading is emotional, bot settings are messy, and execution comes too late.
-
-It's time to upgrade to BitAl - built to analyze real-time market data and execute your trades automatically, 24/7."""
-
-STEP1_MSG = """Step 1/7: Register and download BitAl
-
-To start using BitAl, you need to register for your FREE BitAl account and download BitAl app. If you are referred by our BitAl user, please use their referral link to register."""
-
-STEP2_MSG = """Step 2/7: Setting up Binance Account
-
-To start using BitAl, you need a Binance account with KYC verification completed.
-
-Already have a verified Binance account? You may skip this video and continue to BitAI License Activation."""
-
-STEP3_MSG = """Step 3/7: BitAI License Activation
-
-To unlock BitAI's full auto AI trading, activate your BitAI License inside your BitAI app. Once activated, you can proceed to activate & enable your Binance Futures."""
-
-STEP4_MSG = """Step 4/7: Activate & Enable Binance Futures
-
-Before BitAI can execute, you need to activate Binance Futures inside your Binance account.
-
-Once Futures is enabled, you can continue to the next step and create your Binance API connection."""
-
-STEP5_MSG = """Step 5/7: Set Up Your API Keys
-
-Next, create your Binance API Keys and connect them to your BitAI account.
-
-This allows BitAI to analyze real-time market data and execute based on your selected risk profile.
-
-Make sure your API Keys are kept private and only connected inside the official BitAI platform."""
-
-STEP6_MSG = """Step 6/7: Transfer USDT to Binance Futures
-
-Before BitAI can execute, make sure your USDT is transferred into your own Binance Futures Wallet.
-
-This will be the capital used for BitAI's AI-driven execution based on your selected risk profile.
-
-Once completed, continue to Select Risk Profile."""
-
-STEP7_MSG = """Step 7/7: Select Your Risk Profile
-
-Choose your preferred BitAI Risk Profile based on your capital, goals, and risk appetite.
-
-BitAI will execute according to the risk level you select.
-
-Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
-
-# ============ HELPER FUNCTIONS ============
-def send_video(chat_id, video_id, caption):
-    url = f"{API_URL}/sendVideo"
-    data = {
-        'chat_id': chat_id,
-        'video': video_id,
-        'caption': caption,
-        'parse_mode': 'Markdown'
-    }
-    try:
-        response = requests.post(url, data=data, timeout=30)
-        return response.json()
-    except Exception as e:
-        logger.error(f"Error sending video: {e}")
-        return None
-
-def send_message_with_buttons(chat_id, text, buttons):
-    url = f"{API_URL}/sendMessage"
-    keyboard = {'inline_keyboard': buttons}
-    data = {
+def send_message(chat_id, text, reply_markup=None, parse_mode='Markdown'):
+    """Send a text message via Telegram Bot API."""
+    url = f'{BASE_URL}/sendMessage'
+    payload = {
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'Markdown',
-        'reply_markup': json.dumps(keyboard)
+        'parse_mode': parse_mode
     }
+    if reply_markup:
+        payload['reply_markup'] = json.dumps(reply_markup)
+    
     try:
-        response = requests.post(url, data=data, timeout=30)
-        logger.info(f"Sent message with buttons to {chat_id}")
+        response = requests.post(url, json=payload, timeout=30)
+        response.raise_for_status()
         return response.json()
-    except Exception as e:
-        logger.error(f"Error sending message with buttons: {e}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending message: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response: {e.response.text}")
         return None
 
-def send_message(chat_id, text):
-    url = f"{API_URL}/sendMessage"
-    data = {
+
+def send_video(chat_id, video_file_id, caption=None, reply_markup=None, parse_mode='Markdown'):
+    """Send a video via Telegram Bot API using file_id."""
+    url = f'{BASE_URL}/sendVideo'
+    payload = {
         'chat_id': chat_id,
-        'text': text,
-        'parse_mode': 'Markdown'
+        'video': video_file_id,
+        'parse_mode': parse_mode
     }
+    if caption:
+        payload['caption'] = caption
+    if reply_markup:
+        payload['reply_markup'] = json.dumps(reply_markup)
+    
     try:
-        response = requests.post(url, data=data, timeout=30)
+        response = requests.post(url, json=payload, timeout=30)
+        response.raise_for_status()
         return response.json()
-    except Exception as e:
-        logger.error(f"Error sending message: {e}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending video: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response: {e.response.text}")
         return None
 
-def delete_message(chat_id, message_id):
-    url = f"{API_URL}/deleteMessage"
-    data = {'chat_id': chat_id, 'message_id': message_id}
-    try:
-        requests.post(url, data=data, timeout=30)
-    except Exception as e:
-        logger.error(f"Error deleting message: {e}")
 
-def answer_callback(callback_id):
-    url = f"{API_URL}/answerCallbackQuery"
-    data = {'callback_query_id': callback_id}
+def answer_callback_query(callback_query_id, text=None):
+    """Answer a callback query to remove the loading state."""
+    url = f'{BASE_URL}/answerCallbackQuery'
+    payload = {'callback_query_id': callback_query_id}
+    if text:
+        payload['text'] = text
+    
     try:
-        requests.post(url, data=data, timeout=30)
-    except Exception as e:
-        logger.error(f"Error answering callback: {e}")
+        response = requests.post(url, json=payload, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error answering callback: {e}")
+        return None
 
-# ============ HANDLE UPDATES ============
-def handle_update(update):
-    try:
-        if 'message' in update and 'text' in update['message']:
-            chat_id = update['message']['chat']['id']
-            text = update['message']['text']
-            
-            if text == '/start':
-                send_video(chat_id, VIDEOS['entry'], ENTRY_MSG)
-                buttons = [
-                    [{"text": "Register my FREE BitAl account", "url": REGISTER_LINK}],
-                    [{"text": "Download BitAl (iOS & Android)", "url": DOWNLOAD_BITAL}],
-                    [{"text": "➡️ NEXT", "callback_data": "step1"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Choose an option:", buttons)
+
+# ==================== KEYBOARD BUILDERS ====================
+
+def build_entry_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '📝 Register FREE', 'url': LINKS['register']},
+                {'text': '📲 Download BitAl', 'url': LINKS['download_bital']}
+            ],
+            [
+                {'text': '➡️ NEXT', 'callback_data': 'step1'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step1_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '📝 Register', 'url': LINKS['register']},
+                {'text': '📲 Download', 'url': LINKS['download_bital']}
+            ],
+            [
+                {'text': '➡️ NEXT', 'callback_data': 'step2'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step2_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '🏦 Create Binance', 'url': LINKS['binance_register']},
+                {'text': '📲 Download Binance', 'url': LINKS['binance_download']}
+            ],
+            [
+                {'text': '⬅️ BACK', 'callback_data': 'step1'},
+                {'text': '➡️ NEXT', 'callback_data': 'step3'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step3_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '⬅️ BACK', 'callback_data': 'step2'},
+                {'text': '➡️ NEXT', 'callback_data': 'step4'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step4_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '⬅️ BACK', 'callback_data': 'step3'},
+                {'text': '➡️ NEXT', 'callback_data': 'step5'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step5_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '⬅️ BACK', 'callback_data': 'step4'},
+                {'text': '➡️ NEXT', 'callback_data': 'step6'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step6_keyboard():
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '⬅️ BACK', 'callback_data': 'step5'},
+                {'text': '➡️ NEXT', 'callback_data': 'step7'}
+            ],
+            [
+                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+            ]
+        ]
+    }
+
+
+def build_step7_keyboard():
+    """
+    STEP 7 KEYBOARD - Short button labels, each opens its own link.
+    BACK: callback to return to step 6
+    WEBSITE: opens https://www.bitai.app
+    EMAIL SUPPORT: opens mailto link (using t.me share as workaround since mailto: not supported in inline keyboards)
+    CONTACT SUPPORT: opens WhatsApp http://wa.me/6589691668
+    EXIT: callback to close conversation
+    """
+    return {
+        'inline_keyboard': [
+            [
+                {'text': '◀️ BACK', 'callback_data': 'step6'}
+            ],
+            [
+                {'text': '🌐 WEBSITE', 'url': LINKS['website']}
+            ],
+            [
+                {'text': '✉️ EMAIL SUPPORT', 'url': 'https://t.me/share/url?url=&text=Contact%20BitAl%20Support:%20info@bitai.app'}
+            ],
+            [
+                {'text': '📞 CONTACT SUPPORT', 'url': LINKS['support_whatsapp']}
+            ],
+            [
+                {'text': '❌ EXIT', 'callback_data': 'exit'}
+            ]
+        ]
+    }
+
+
+# ==================== STEP HANDLERS ====================
+
+def handle_entry(chat_id):
+    """Handle the entry/welcome step."""
+    send_video(chat_id, VIDEOS['entry'])
+    send_message(chat_id, MESSAGES['entry'], build_entry_keyboard())
+
+
+def handle_step1(chat_id):
+    """Handle Step 1."""
+    send_video(chat_id, VIDEOS['step1'])
+    send_message(chat_id, MESSAGES['step1'], build_step1_keyboard())
+
+
+def handle_step2(chat_id):
+    """Handle Step 2."""
+    send_video(chat_id, VIDEOS['step2'])
+    send_message(chat_id, MESSAGES['step2'], build_step2_keyboard())
+
+
+def handle_step3(chat_id):
+    """Handle Step 3."""
+    send_video(chat_id, VIDEOS['step3'])
+    send_message(chat_id, MESSAGES['step3'], build_step3_keyboard())
+
+
+def handle_step4(chat_id):
+    """Handle Step 4."""
+    send_video(chat_id, VIDEOS['step4'])
+    send_message(chat_id, MESSAGES['step4'], build_step4_keyboard())
+
+
+def handle_step5(chat_id):
+    """Handle Step 5."""
+    send_video(chat_id, VIDEOS['step5'])
+    send_message(chat_id, MESSAGES['step5'], build_step5_keyboard())
+
+
+def handle_step6(chat_id):
+    """Handle Step 6."""
+    send_video(chat_id, VIDEOS['step6'])
+    send_message(chat_id, MESSAGES['step6'], build_step6_keyboard())
+
+
+def handle_step7(chat_id):
+    """Handle Step 7 (FINAL STEP)."""
+    send_video(chat_id, VIDEOS['step7'])
+    send_message(chat_id, MESSAGES['step7'], build_step7_keyboard())
+
+
+def handle_exit(chat_id):
+    """Handle exit conversation."""
+    send_message(
+        chat_id,
+        "👋 *Thank you for using BitAl Helper Bot!*\\n\\n"
+        "If you need help again, just send /start.\\n\\n"
+        "Happy trading! 🚀",
+        parse_mode='Markdown'
+    )
+
+
+# ==================== WEBHOOK HANDLER ====================
+
+app = Flask(__name__)
+
+
+@app.route('/', methods=['POST'])
+def webhook():
+    """Handle incoming Telegram updates via webhook."""
+    data = request.get_json()
+    
+    if not data:
+        return 'OK', 200
+    
+    # Handle callback queries (button clicks)
+    if 'callback_query' in data:
+        callback = data['callback_query']
+        chat_id = callback['message']['chat']['id']
+        callback_query_id = callback['id']
+        callback_data = callback['data']
         
-        elif 'callback_query' in update:
-            query = update['callback_query']
-            chat_id = query['message']['chat']['id']
-            data = query['data']
-            message_id = query['message']['message_id']
-            callback_id = query['id']
-            
-            answer_callback(callback_id)
-            delete_message(chat_id, message_id)
-            
-            if data == 'step1':
-                send_video(chat_id, VIDEOS['step1'], STEP1_MSG)
-                buttons = [
-                    [{"text": "Register FREE BitAl account", "url": REGISTER_LINK}],
-                    [{"text": "Download BitAl", "url": DOWNLOAD_BITAL}],
-                    [{"text": "➡️ NEXT", "callback_data": "step2"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 1/7", buttons)
-                
-            elif data == 'step2':
-                send_video(chat_id, VIDEOS['step2'], STEP2_MSG)
-                buttons = [
-                    [{"text": "Create FREE Binance account", "url": BINANCE_REGISTER}],
-                    [{"text": "Download Binance", "url": BINANCE_DOWNLOAD}],
-                    [{"text": "➡️ NEXT", "callback_data": "step3"}],
-                    [{"text": "◀️ BACK", "callback_data": "step1"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 2/7", buttons)
-                
-            elif data == 'step3':
-                send_video(chat_id, VIDEOS['step3'], STEP3_MSG)
-                buttons = [
-                    [{"text": "➡️ NEXT", "callback_data": "step4"}],
-                    [{"text": "◀️ BACK", "callback_data": "step2"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 3/7", buttons)
-                
-            elif data == 'step4':
-                send_video(chat_id, VIDEOS['step4'], STEP4_MSG)
-                buttons = [
-                    [{"text": "➡️ NEXT", "callback_data": "step5"}],
-                    [{"text": "◀️ BACK", "callback_data": "step3"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 4/7", buttons)
-                
-            elif data == 'step5':
-                send_video(chat_id, VIDEOS['step5'], STEP5_MSG)
-                buttons = [
-                    [{"text": "➡️ NEXT", "callback_data": "step6"}],
-                    [{"text": "◀️ BACK", "callback_data": "step4"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 5/7", buttons)
-                
-            elif data == 'step6':
-                send_video(chat_id, VIDEOS['step6'], STEP6_MSG)
-                buttons = [
-                    [{"text": "➡️ NEXT", "callback_data": "step7"}],
-                    [{"text": "◀️ BACK", "callback_data": "step5"}],
-                    [{"text": "Contact support", "url": SUPPORT_WA}]
-                ]
-                send_message_with_buttons(chat_id, "Step 6/7", buttons)
-                
-            elif data == 'step7':
-                # Send Step 7 video
-                send_video(chat_id, VIDEOS['step7'], STEP7_MSG)
-                
-                # SHORT BUTTONS (under 64 characters) with full text in message above
-                buttons = [
-                    [{"text": "◀️ Back", "callback_data": "step6"}],
-                    [{"text": "🌐 Website", "url": WEBSITE}],
-                    [{"text": "✉️ Email", "url": f"mailto:{EMAIL_SUPPORT}"}],
-                    [{"text": "📞 WhatsApp", "url": SUPPORT_WA}],
-                    [{"text": "❌ Exit", "callback_data": "exit"}]
-                ]
-                
-                send_message_with_buttons(
-                    chat_id,
-                    "✅ Step 7/7 - Setup Complete!\n\n"
-                    "🔹 Back to previous step (Transferring USDT to Binance Futures)\n"
-                    "🔹 Website: https://www.bitai.app\n"
-                    "🔹 Email support: info@bitai.app\n"
-                    "🔹 Contact support: http://wa.me/6589691668\n"
-                    "🔹 Exit Conversation (close bot)\n\n"
-                    "Click a button below:",
-                    buttons
-                )
-                
-            elif data == 'exit':
-                send_message(chat_id, "👋 Conversation ended. Send /start to begin again.")
+        # Answer the callback to remove loading state
+        answer_callback_query(callback_query_id)
+        
+        # Route to appropriate handler
+        if callback_data == 'step1':
+            handle_step1(chat_id)
+        elif callback_data == 'step2':
+            handle_step2(chat_id)
+        elif callback_data == 'step3':
+            handle_step3(chat_id)
+        elif callback_data == 'step4':
+            handle_step4(chat_id)
+        elif callback_data == 'step5':
+            handle_step5(chat_id)
+        elif callback_data == 'step6':
+            handle_step6(chat_id)
+        elif callback_data == 'step7':
+            handle_step7(chat_id)
+        elif callback_data == 'exit':
+            handle_exit(chat_id)
+        
+        return 'OK', 200
     
-    except Exception as e:
-        logger.error(f"Error handling update: {e}")
+    # Handle regular messages (e.g., /start)
+    if 'message' in data:
+        message = data['message']
+        chat_id = message['chat']['id']
+        text = message.get('text', '')
+        
+        if text.startswith('/start'):
+            handle_entry(chat_id)
+        else:
+            send_message(
+                chat_id,
+                "👋 Send /start to begin the BitAl setup guide!",
+                parse_mode='Markdown'
+            )
+        
+        return 'OK', 200
+    
+    return 'OK', 200
 
-# ============ MAIN ============
-def main():
-    logger.info("🚀 Starting BitAl Bot...")
+
+@app.route('/', methods=['GET'])
+def health_check():
+    """Simple health check endpoint."""
+    return 'BitAl Helper Bot is running!', 200
+
+
+# ==================== SETUP ====================
+
+def set_webhook():
+    """Set the webhook URL with Telegram."""
+    if not WEBHOOK_URL:
+        print("WARNING: WEBHOOK_URL not set. Skipping webhook setup.")
+        return
     
-    last_update_id = 0
-    logger.info("✅ Bot is ready! Waiting for messages...")
+    url = f'{BASE_URL}/setWebhook'
+    payload = {
+        'url': WEBHOOK_URL,
+        'max_connections': 40,
+        'allowed_updates': ['message', 'callback_query']
+    }
     
-    while True:
-        try:
-            url = f"{API_URL}/getUpdates"
-            params = {
-                'offset': last_update_id + 1,
-                'timeout': 30
-            }
-            response = requests.get(url, params=params, timeout=35)
-            data = response.json()
-            
-            if data.get('ok'):
-                for update in data.get('result', []):
-                    last_update_id = update['update_id']
-                    handle_update(update)
-            
-            time.sleep(1)
-            
-        except Exception as e:
-            logger.error(f"Error in main loop: {e}")
-            time.sleep(5)
+    try:
+        response = requests.post(url, json=payload, timeout=30)
+        result = response.json()
+        if result.get('ok'):
+            print(f"✅ Webhook set successfully: {WEBHOOK_URL}")
+        else:
+            print(f"❌ Failed to set webhook: {result}")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error setting webhook: {e}")
+
+
+# ==================== MAIN ====================
 
 if __name__ == '__main__':
-    main()
+    set_webhook()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+'''
+
+with open('/mnt/agents/output/bital_bot.py', 'w') as f:
+    f.write(bot_code)
+
+print("✅ Updated bital_bot.py saved with short button labels!")
+print("\n📋 STEP 7 BUTTONS:")
+print("   ◀️ BACK          → callback_data: 'step6' (goes back to step 6)")
+print("   🌐 WEBSITE       → url: https://www.bitai.app")
+print("   ✉️ EMAIL SUPPORT → url: t.me share with email text")
+print("   📞 CONTACT SUPPORT → url: http://wa.me/6589691668")
+print("   ❌ EXIT          → callback_data: 'exit' (closes conversation)")
