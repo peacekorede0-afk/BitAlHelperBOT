@@ -1,7 +1,8 @@
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+import requests
+import json
+import time
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,6 +15,9 @@ if not BOT_TOKEN:
     exit(1)
 
 logger.info(f"✅ Bot token loaded")
+
+# ============ TELEGRAM API URL ============
+API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 # ============ YOUR FILE_IDS ============
 VIDEOS = {
@@ -89,171 +93,198 @@ BitAI will execute according to the risk level you select.
 
 Once done, BitAI will start to analyze real time market data and execute your trades automatically!"""
 
-# ============ HANDLERS ============
-def start(bot, update):
-    chat_id = update.message.chat_id
-    
-    bot.send_video(
-        chat_id=chat_id,
-        video=VIDEOS['entry'],
-        caption=ENTRY_MSG,
-        parse_mode='Markdown'
-    )
-    
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Register my FREE BitAl account", url=REGISTER_LINK)],
-        [InlineKeyboardButton("Download BitAl (iOS & Android)", url=DOWNLOAD_BITAL)],
-        [InlineKeyboardButton("➡️ NEXT", callback_data='step1')],
-        [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-    ])
-    bot.send_message(chat_id=chat_id, text="Choose an option:", reply_markup=keyboard)
-
-def button_handler(bot, update):
-    query = update.callback_query
-    query.answer()
-    chat_id = query.message.chat_id
-    data = query.data
-    
+# ============ HELPER FUNCTIONS ============
+def send_video(chat_id, video_id, caption):
+    """Send video using direct API call"""
+    url = f"{API_URL}/sendVideo"
+    data = {
+        'chat_id': chat_id,
+        'video': video_id,
+        'caption': caption,
+        'parse_mode': 'Markdown'
+    }
     try:
-        query.message.delete()
-    except:
-        pass
+        response = requests.post(url, data=data, timeout=30)
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error sending video: {e}")
+        return None
+
+def send_message(chat_id, text, keyboard=None):
+    """Send message with optional keyboard"""
+    url = f"{API_URL}/sendMessage"
+    data = {
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': 'Markdown'
+    }
+    if keyboard:
+        data['reply_markup'] = json.dumps(keyboard)
+    try:
+        response = requests.post(url, data=data, timeout=30)
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error sending message: {e}")
+        return None
+
+def send_keyboard(chat_id, text, buttons):
+    """Send message with inline keyboard"""
+    keyboard = {
+        'inline_keyboard': buttons
+    }
+    return send_message(chat_id, text, keyboard)
+
+# ============ HANDLE UPDATES ============
+def handle_update(update):
+    """Process incoming updates"""
+    try:
+        # Handle /start command
+        if 'message' in update and 'text' in update['message']:
+            chat_id = update['message']['chat']['id']
+            text = update['message']['text']
+            
+            if text == '/start':
+                # Send entry video
+                send_video(chat_id, VIDEOS['entry'], ENTRY_MSG)
+                
+                # Send buttons
+                buttons = [
+                    [{"text": "Register my FREE BitAl account", "url": REGISTER_LINK}],
+                    [{"text": "Download BitAl (iOS & Android)", "url": DOWNLOAD_BITAL}],
+                    [{"text": "➡️ NEXT", "callback_data": "step1"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Choose an option:", buttons)
+        
+        # Handle button clicks
+        elif 'callback_query' in update:
+            query = update['callback_query']
+            chat_id = query['message']['chat']['id']
+            data = query['data']
+            message_id = query['message']['message_id']
+            
+            # Answer callback query
+            url = f"{API_URL}/answerCallbackQuery"
+            requests.post(url, data={'callback_query_id': query['id']})
+            
+            # Delete previous message
+            url = f"{API_URL}/deleteMessage"
+            requests.post(url, data={'chat_id': chat_id, 'message_id': message_id})
+            
+            if data == 'step1':
+                send_video(chat_id, VIDEOS['step1'], STEP1_MSG)
+                buttons = [
+                    [{"text": "Register FREE BitAl account", "url": REGISTER_LINK}],
+                    [{"text": "Download BitAl", "url": DOWNLOAD_BITAL}],
+                    [{"text": "➡️ NEXT", "callback_data": "step2"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 1/7", buttons)
+                
+            elif data == 'step2':
+                send_video(chat_id, VIDEOS['step2'], STEP2_MSG)
+                buttons = [
+                    [{"text": "Create FREE Binance account", "url": BINANCE_REGISTER}],
+                    [{"text": "Download Binance (iOS & Android)", "url": BINANCE_DOWNLOAD}],
+                    [{"text": "➡️ NEXT", "callback_data": "step3"}],
+                    [{"text": "◀️ BACK", "callback_data": "step1"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 2/7", buttons)
+                
+            elif data == 'step3':
+                send_video(chat_id, VIDEOS['step3'], STEP3_MSG)
+                buttons = [
+                    [{"text": "➡️ NEXT", "callback_data": "step4"}],
+                    [{"text": "◀️ BACK", "callback_data": "step2"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 3/7", buttons)
+                
+            elif data == 'step4':
+                send_video(chat_id, VIDEOS['step4'], STEP4_MSG)
+                buttons = [
+                    [{"text": "➡️ NEXT", "callback_data": "step5"}],
+                    [{"text": "◀️ BACK", "callback_data": "step3"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 4/7", buttons)
+                
+            elif data == 'step5':
+                send_video(chat_id, VIDEOS['step5'], STEP5_MSG)
+                buttons = [
+                    [{"text": "➡️ NEXT", "callback_data": "step6"}],
+                    [{"text": "◀️ BACK", "callback_data": "step4"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 5/7", buttons)
+                
+            elif data == 'step6':
+                send_video(chat_id, VIDEOS['step6'], STEP6_MSG)
+                buttons = [
+                    [{"text": "➡️ NEXT", "callback_data": "step7"}],
+                    [{"text": "◀️ BACK", "callback_data": "step5"}],
+                    [{"text": "Contact support", "url": SUPPORT_WA}]
+                ]
+                send_keyboard(chat_id, "Step 6/7", buttons)
+                
+            elif data == 'step7':
+                send_video(chat_id, VIDEOS['step7'], STEP7_MSG)
+                buttons = [
+                    [{"text": "◀️ Back to Step 6", "callback_data": "step6"}],
+                    [{"text": "🌐 Website", "url": WEBSITE}],
+                    [{"text": "✉️ Email", "url": f"mailto:{EMAIL_SUPPORT}"}],
+                    [{"text": "📞 WhatsApp", "url": SUPPORT_WA}],
+                    [{"text": "❌ Exit", "callback_data": "exit"}]
+                ]
+                send_keyboard(
+                    chat_id,
+                    "✅ Step 7/7 - Setup Complete!\n\n"
+                    "5 Buttons:\n"
+                    "1. Back to previous step (Transferring USDT to Binance Futures)\n"
+                    "2. Website https://www.bitai.app\n"
+                    "3. Email support: info@bitai.app\n"
+                    "4. Contact support http://wa.me/6589691668\n"
+                    "5. Exit Conversation (close bot)",
+                    buttons
+                )
+                
+            elif data == 'exit':
+                send_message(chat_id, "👋 Conversation ended. Send /start to begin again.")
     
-    if data == 'step1':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step1'],
-            caption=STEP1_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Register FREE BitAl account", url=REGISTER_LINK)],
-            [InlineKeyboardButton("Download BitAl", url=DOWNLOAD_BITAL)],
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step2')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 1/7", reply_markup=keyboard)
-        
-    elif data == 'step2':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step2'],
-            caption=STEP2_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Create FREE Binance account", url=BINANCE_REGISTER)],
-            [InlineKeyboardButton("Download Binance (iOS & Android)", url=BINANCE_DOWNLOAD)],
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step3')],
-            [InlineKeyboardButton("◀️ BACK", callback_data='step1')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 2/7", reply_markup=keyboard)
-        
-    elif data == 'step3':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step3'],
-            caption=STEP3_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step4')],
-            [InlineKeyboardButton("◀️ BACK", callback_data='step2')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 3/7", reply_markup=keyboard)
-        
-    elif data == 'step4':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step4'],
-            caption=STEP4_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step5')],
-            [InlineKeyboardButton("◀️ BACK", callback_data='step3')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 4/7", reply_markup=keyboard)
-        
-    elif data == 'step5':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step5'],
-            caption=STEP5_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step6')],
-            [InlineKeyboardButton("◀️ BACK", callback_data='step4')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 5/7", reply_markup=keyboard)
-        
-    elif data == 'step6':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step6'],
-            caption=STEP6_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("➡️ NEXT", callback_data='step7')],
-            [InlineKeyboardButton("◀️ BACK", callback_data='step5')],
-            [InlineKeyboardButton("Contact support", url=SUPPORT_WA)]
-        ])
-        bot.send_message(chat_id=chat_id, text="Step 6/7", reply_markup=keyboard)
-        
-    elif data == 'step7':
-        bot.send_video(
-            chat_id=chat_id,
-            video=VIDEOS['step7'],
-            caption=STEP7_MSG,
-            parse_mode='Markdown'
-        )
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("◀️ Back to Step 6", callback_data='step6')],
-            [InlineKeyboardButton("🌐 Website", url=WEBSITE)],
-            [InlineKeyboardButton("✉️ Email", url=f"mailto:{EMAIL_SUPPORT}")],
-            [InlineKeyboardButton("📞 WhatsApp", url=SUPPORT_WA)],
-            [InlineKeyboardButton("❌ Exit", callback_data='exit')]
-        ])
-        bot.send_message(
-            chat_id=chat_id,
-            text="✅ Step 7/7 - Setup Complete!\n\n"
-                 "5 Buttons:\n"
-                 "1. Back to previous step (Transferring USDT to Binance Futures)\n"
-                 "2. Website https://www.bitai.app\n"
-                 "3. Email support: info@bitai.app\n"
-                 "4. Contact support http://wa.me/6589691668\n"
-                 "5. Exit Conversation (close bot)",
-            reply_markup=keyboard
-        )
-        
-    elif data == 'exit':
-        bot.send_message(chat_id=chat_id, text="👋 Conversation ended. Send /start to begin again.")
+    except Exception as e:
+        logger.error(f"Error handling update: {e}")
 
 # ============ MAIN ============
 def main():
     logger.info("🚀 Starting BitAl Bot...")
     
-    try:
-        # Simple Updater without any arguments
-        updater = Updater(BOT_TOKEN)
-        dp = updater.dispatcher
-        
-        dp.add_handler(CommandHandler("start", start))
-        dp.add_handler(CallbackQueryHandler(button_handler))
-        
-        logger.info("✅ Bot is ready! Waiting for messages...")
-        updater.start_polling()
-        updater.idle()
-        
-    except Exception as e:
-        logger.error(f"❌ Bot failed to start: {e}")
-        raise
+    # Set webhook (or use polling)
+    last_update_id = 0
+    
+    logger.info("✅ Bot is ready! Waiting for messages...")
+    
+    while True:
+        try:
+            # Get updates
+            url = f"{API_URL}/getUpdates"
+            params = {
+                'offset': last_update_id + 1,
+                'timeout': 30
+            }
+            response = requests.get(url, params=params, timeout=35)
+            data = response.json()
+            
+            if data.get('ok'):
+                for update in data.get('result', []):
+                    last_update_id = update['update_id']
+                    handle_update(update)
+            
+            time.sleep(1)
+            
+        except Exception as e:
+            logger.error(f"Error in main loop: {e}")
+            time.sleep(5)
 
 if __name__ == '__main__':
     main()
