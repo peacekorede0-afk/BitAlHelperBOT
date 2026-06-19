@@ -1,4 +1,4 @@
-r'''import requests
+import requests
 import json
 import os
 from flask import Flask, request
@@ -33,14 +33,14 @@ LINKS = {
 
 # ==================== MESSAGES ====================
 MESSAGES = {
-    'entry': "👋 *Welcome to BitAl Helper Bot!*\n\nI'm here to guide you through setting up your *BitAl AI Trading Bot* in 7 simple steps.\n\n🎥 Watch the welcome video above, then click the buttons below to get started!",
-    'step1': "📱 *Step 1/7: Register and Download BitAl*\n\n1️⃣ Click *Register* to create your FREE BitAl account\n2️⃣ Click *Download* to install BitAl on iOS or Android\n\n🎥 Watch the video above for a visual guide!",
-    'step2': "🏦 *Step 2/7: Setting Up Your Binance Account*\n\n1️⃣ Click *Create Binance* to register your account\n2️⃣ Click *Download Binance* to install the app\n\n🎥 Watch the video above for detailed instructions!",
-    'step3': "🔑 *Step 3/7: BitAl License Activation*\n\nActivate your BitAl license to unlock full trading capabilities.\n\n🎥 Watch the video above to see how it's done!",
-    'step4': "⚡ *Step 4/7: Activate & Enable Binance Futures*\n\nEnable Futures trading on your Binance account.\n\n🎥 Watch the video above for the step-by-step process!",
-    'step5': "🔐 *Step 5/7: Set Up Your API Keys*\n\nConnect BitAl to Binance using API keys for secure trading.\n\n🎥 Watch the video above to learn how to generate and configure your API keys!",
-    'step6': "💰 *Step 6/7: Transfer USDT to Binance Futures*\n\nFund your Binance Futures wallet with USDT to start trading.\n\n🎥 Watch the video above for the transfer process!",
-    'step7': "✅ *Step 7/7 - Setup Complete!*\n\n🎉 Congratulations! You've completed all 7 setup steps!\n\nYour BitAl bot is now ready to trade. Use the buttons below:"
+    'entry': 'Welcome to BitAl Helper Bot!\n\nI\'m here to guide you through setting up your BitAl AI Trading Bot in 7 simple steps.\n\nWatch the welcome video above, then click the buttons below to get started!',
+    'step1': 'Step 1/7: Register and Download BitAl\n\n1. Click Register to create your FREE BitAl account\n2. Click Download to install BitAl on iOS or Android\n\nWatch the video above for a visual guide!',
+    'step2': 'Step 2/7: Setting Up Your Binance Account\n\n1. Click Create Binance to register your account\n2. Click Download Binance to install the app\n\nWatch the video above for detailed instructions!',
+    'step3': 'Step 3/7: BitAl License Activation\n\nActivate your BitAl license to unlock full trading capabilities.\n\nWatch the video above to see how it is done!',
+    'step4': 'Step 4/7: Activate & Enable Binance Futures\n\nEnable Futures trading on your Binance account.\n\nWatch the video above for the step-by-step process!',
+    'step5': 'Step 5/7: Set Up Your API Keys\n\nConnect BitAl to Binance using API keys for secure trading.\n\nWatch the video above to learn how to generate and configure your API keys!',
+    'step6': 'Step 6/7: Transfer USDT to Binance Futures\n\nFund your Binance Futures wallet with USDT to start trading.\n\nWatch the video above for the transfer process!',
+    'step7': 'Step 7/7 - Setup Complete!\n\nCongratulations! You have completed all 7 setup steps!\n\nYour BitAl bot is now ready to trade. Use the buttons below:'
 }
 
 # ==================== TELEGRAM API HELPERS ====================
@@ -59,9 +59,9 @@ def send_message(chat_id, text, reply_markup=None, parse_mode='Markdown'):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error sending message: {e}")
+        print(f'Error sending message: {e}')
         if hasattr(e, 'response') and e.response is not None:
-            print(f"Response: {e.response.text}")
+            print(f'Response: {e.response.text}')
         return None
 
 
@@ -81,9 +81,9 @@ def send_video(chat_id, video_file_id, caption=None, reply_markup=None, parse_mo
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error sending video: {e}")
+        print(f'Error sending video: {e}')
         if hasattr(e, 'response') and e.response is not None:
-            print(f"Response: {e.response.text}")
+            print(f'Response: {e.response.text}')
         return None
 
 
@@ -97,7 +97,7 @@ def answer_callback_query(callback_query_id, text=None):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error answering callback: {e}")
+        print(f'Error answering callback: {e}')
         return None
 
 
@@ -107,14 +107,14 @@ def build_entry_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '📝 Register FREE', 'url': LINKS['register']},
-                {'text': '📲 Download BitAl', 'url': LINKS['download_bital']}
+                {'text': 'Register FREE', 'url': LINKS['register']},
+                {'text': 'Download BitAl', 'url': LINKS['download_bital']}
             ],
             [
-                {'text': '➡️ NEXT', 'callback_data': 'step1'}
+                {'text': 'NEXT', 'callback_data': 'step1'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -124,14 +124,14 @@ def build_step1_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '📝 Register', 'url': LINKS['register']},
-                {'text': '📲 Download', 'url': LINKS['download_bital']}
+                {'text': 'Register', 'url': LINKS['register']},
+                {'text': 'Download', 'url': LINKS['download_bital']}
             ],
             [
-                {'text': '➡️ NEXT', 'callback_data': 'step2'}
+                {'text': 'NEXT', 'callback_data': 'step2'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -141,15 +141,15 @@ def build_step2_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '🏦 Create Binance', 'url': LINKS['binance_register']},
-                {'text': '📲 Download Binance', 'url': LINKS['binance_download']}
+                {'text': 'Create Binance', 'url': LINKS['binance_register']},
+                {'text': 'Download Binance', 'url': LINKS['binance_download']}
             ],
             [
-                {'text': '⬅️ BACK', 'callback_data': 'step1'},
-                {'text': '➡️ NEXT', 'callback_data': 'step3'}
+                {'text': 'BACK', 'callback_data': 'step1'},
+                {'text': 'NEXT', 'callback_data': 'step3'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -159,11 +159,11 @@ def build_step3_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '⬅️ BACK', 'callback_data': 'step2'},
-                {'text': '➡️ NEXT', 'callback_data': 'step4'}
+                {'text': 'BACK', 'callback_data': 'step2'},
+                {'text': 'NEXT', 'callback_data': 'step4'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -173,11 +173,11 @@ def build_step4_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '⬅️ BACK', 'callback_data': 'step3'},
-                {'text': '➡️ NEXT', 'callback_data': 'step5'}
+                {'text': 'BACK', 'callback_data': 'step3'},
+                {'text': 'NEXT', 'callback_data': 'step5'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -187,11 +187,11 @@ def build_step5_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '⬅️ BACK', 'callback_data': 'step4'},
-                {'text': '➡️ NEXT', 'callback_data': 'step6'}
+                {'text': 'BACK', 'callback_data': 'step4'},
+                {'text': 'NEXT', 'callback_data': 'step6'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -201,11 +201,11 @@ def build_step6_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '⬅️ BACK', 'callback_data': 'step5'},
-                {'text': '➡️ NEXT', 'callback_data': 'step7'}
+                {'text': 'BACK', 'callback_data': 'step5'},
+                {'text': 'NEXT', 'callback_data': 'step7'}
             ],
             [
-                {'text': '🆘 Contact Support', 'url': LINKS['support_whatsapp']}
+                {'text': 'Contact Support', 'url': LINKS['support_whatsapp']}
             ]
         ]
     }
@@ -215,19 +215,19 @@ def build_step7_keyboard():
     return {
         'inline_keyboard': [
             [
-                {'text': '◀️ BACK', 'callback_data': 'step6'}
+                {'text': 'BACK', 'callback_data': 'step6'}
             ],
             [
-                {'text': '🌐 WEBSITE', 'url': LINKS['website']}
+                {'text': 'WEBSITE', 'url': LINKS['website']}
             ],
             [
-                {'text': '✉️ EMAIL SUPPORT', 'url': 'https://t.me/share/url?url=&text=Contact%20BitAl%20Support:%20info@bitai.app'}
+                {'text': 'EMAIL SUPPORT', 'url': 'https://t.me/share/url?url=&text=Contact%20BitAl%20Support:%20info@bitai.app'}
             ],
             [
-                {'text': '📞 CONTACT SUPPORT', 'url': LINKS['support_whatsapp']}
+                {'text': 'CONTACT SUPPORT', 'url': LINKS['support_whatsapp']}
             ],
             [
-                {'text': '❌ EXIT', 'callback_data': 'exit'}
+                {'text': 'EXIT', 'callback_data': 'exit'}
             ]
         ]
     }
@@ -278,7 +278,7 @@ def handle_step7(chat_id):
 def handle_exit(chat_id):
     send_message(
         chat_id,
-        "👋 *Thank you for using BitAl Helper Bot!*\n\nIf you need help again, just send /start.\n\nHappy trading! 🚀",
+        'Thank you for using BitAl Helper Bot!\n\nIf you need help again, just send /start.\n\nHappy trading!',
         parse_mode='Markdown'
     )
 
@@ -326,7 +326,7 @@ def webhook():
         if text.startswith('/start'):
             handle_entry(chat_id)
         else:
-            send_message(chat_id, "👋 Send /start to begin the BitAl setup guide!", parse_mode='Markdown')
+            send_message(chat_id, 'Send /start to begin the BitAl setup guide!', parse_mode='Markdown')
         return 'OK', 200
 
     return 'OK', 200
@@ -341,7 +341,7 @@ def health_check():
 
 def set_webhook():
     if not WEBHOOK_URL:
-        print("WARNING: WEBHOOK_URL not set. Skipping webhook setup.")
+        print('WARNING: WEBHOOK_URL not set. Skipping webhook setup.')
         return
     url = f'{BASE_URL}/setWebhook'
     payload = {
@@ -353,11 +353,11 @@ def set_webhook():
         response = requests.post(url, json=payload, timeout=30)
         result = response.json()
         if result.get('ok'):
-            print(f"Webhook set successfully: {WEBHOOK_URL}")
+            print(f'Webhook set successfully: {WEBHOOK_URL}')
         else:
-            print(f"Failed to set webhook: {result}")
+            print(f'Failed to set webhook: {result}')
     except requests.exceptions.RequestException as e:
-        print(f"Error setting webhook: {e}")
+        print(f'Error setting webhook: {e}')
 
 
 # ==================== MAIN ====================
@@ -366,15 +366,3 @@ if __name__ == '__main__':
     set_webhook()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-'''
-
-with open('/mnt/agents/output/bital_bot.py', 'w') as f:
-    f.write(bot_code)
-
-# Verify syntax
-import py_compile
-try:
-    py_compile.compile('/mnt/agents/output/bital_bot.py', doraise=True)
-    print("✅ SYNTAX CHECK PASSED - No errors!")
-except py_compile.PyCompileError as e:
-    print(f"❌ SYNTAX ERROR: {e}")
