@@ -95,7 +95,6 @@ Once done, BitAI will start to analyze real time market data and execute your tr
 
 # ============ HELPER FUNCTIONS ============
 def send_video(chat_id, video_id, caption):
-    """Send video using direct API call"""
     url = f"{API_URL}/sendVideo"
     data = {
         'chat_id': chat_id,
@@ -111,21 +110,14 @@ def send_video(chat_id, video_id, caption):
         return None
 
 def send_message_with_buttons(chat_id, text, buttons):
-    """Send message with inline keyboard buttons"""
     url = f"{API_URL}/sendMessage"
-    
-    # Format the keyboard correctly
-    keyboard = {
-        'inline_keyboard': buttons
-    }
-    
+    keyboard = {'inline_keyboard': buttons}
     data = {
         'chat_id': chat_id,
         'text': text,
         'parse_mode': 'Markdown',
         'reply_markup': json.dumps(keyboard)
     }
-    
     try:
         response = requests.post(url, data=data, timeout=30)
         logger.info(f"Sent message with buttons to {chat_id}")
@@ -135,7 +127,6 @@ def send_message_with_buttons(chat_id, text, buttons):
         return None
 
 def send_message(chat_id, text):
-    """Send simple message"""
     url = f"{API_URL}/sendMessage"
     data = {
         'chat_id': chat_id,
@@ -150,19 +141,14 @@ def send_message(chat_id, text):
         return None
 
 def delete_message(chat_id, message_id):
-    """Delete a message"""
     url = f"{API_URL}/deleteMessage"
-    data = {
-        'chat_id': chat_id,
-        'message_id': message_id
-    }
+    data = {'chat_id': chat_id, 'message_id': message_id}
     try:
         requests.post(url, data=data, timeout=30)
     except Exception as e:
         logger.error(f"Error deleting message: {e}")
 
 def answer_callback(callback_id):
-    """Answer callback query"""
     url = f"{API_URL}/answerCallbackQuery"
     data = {'callback_query_id': callback_id}
     try:
@@ -172,18 +158,13 @@ def answer_callback(callback_id):
 
 # ============ HANDLE UPDATES ============
 def handle_update(update):
-    """Process incoming updates"""
     try:
-        # Handle /start command
         if 'message' in update and 'text' in update['message']:
             chat_id = update['message']['chat']['id']
             text = update['message']['text']
             
             if text == '/start':
-                # Send entry video
                 send_video(chat_id, VIDEOS['entry'], ENTRY_MSG)
-                
-                # Send buttons
                 buttons = [
                     [{"text": "Register my FREE BitAl account", "url": REGISTER_LINK}],
                     [{"text": "Download BitAl (iOS & Android)", "url": DOWNLOAD_BITAL}],
@@ -192,7 +173,6 @@ def handle_update(update):
                 ]
                 send_message_with_buttons(chat_id, "Choose an option:", buttons)
         
-        # Handle button clicks
         elif 'callback_query' in update:
             query = update['callback_query']
             chat_id = query['message']['chat']['id']
@@ -200,10 +180,7 @@ def handle_update(update):
             message_id = query['message']['message_id']
             callback_id = query['id']
             
-            # Answer callback query
             answer_callback(callback_id)
-            
-            # Delete previous message
             delete_message(chat_id, message_id)
             
             if data == 'step1':
@@ -220,7 +197,7 @@ def handle_update(update):
                 send_video(chat_id, VIDEOS['step2'], STEP2_MSG)
                 buttons = [
                     [{"text": "Create FREE Binance account", "url": BINANCE_REGISTER}],
-                    [{"text": "Download Binance (iOS & Android)", "url": BINANCE_DOWNLOAD}],
+                    [{"text": "Download Binance", "url": BINANCE_DOWNLOAD}],
                     [{"text": "➡️ NEXT", "callback_data": "step3"}],
                     [{"text": "◀️ BACK", "callback_data": "step1"}],
                     [{"text": "Contact support", "url": SUPPORT_WA}]
@@ -267,24 +244,24 @@ def handle_update(update):
                 # Send Step 7 video
                 send_video(chat_id, VIDEOS['step7'], STEP7_MSG)
                 
-                # Send the 5 buttons as a separate message
+                # SHORT BUTTONS (under 64 characters) with full text in message above
                 buttons = [
-                    [{"text": "◀️ Back to previous step (Transferring USDT to Binance Futures)", "callback_data": "step6"}],
-                    [{"text": "🌐 Website https://www.bitai.app", "url": WEBSITE}],
-                    [{"text": "✉️ Email support: info@bitai.app", "url": f"mailto:{EMAIL_SUPPORT}"}],
-                    [{"text": "📞 Contact support http://wa.me/6589691668", "url": SUPPORT_WA}],
-                    [{"text": "❌ Exit Conversation (close bot)", "callback_data": "exit"}]
+                    [{"text": "◀️ Back", "callback_data": "step6"}],
+                    [{"text": "🌐 Website", "url": WEBSITE}],
+                    [{"text": "✉️ Email", "url": f"mailto:{EMAIL_SUPPORT}"}],
+                    [{"text": "📞 WhatsApp", "url": SUPPORT_WA}],
+                    [{"text": "❌ Exit", "callback_data": "exit"}]
                 ]
                 
                 send_message_with_buttons(
                     chat_id,
                     "✅ Step 7/7 - Setup Complete!\n\n"
-                    "5 Buttons:\n"
-                    "1. Back to previous step (Transferring USDT to Binance Futures)\n"
-                    "2. Website https://www.bitai.app\n"
-                    "3. Email support: info@bitai.app\n"
-                    "4. Contact support http://wa.me/6589691668\n"
-                    "5. Exit Conversation (close bot)",
+                    "🔹 Back to previous step (Transferring USDT to Binance Futures)\n"
+                    "🔹 Website: https://www.bitai.app\n"
+                    "🔹 Email support: info@bitai.app\n"
+                    "🔹 Contact support: http://wa.me/6589691668\n"
+                    "🔹 Exit Conversation (close bot)\n\n"
+                    "Click a button below:",
                     buttons
                 )
                 
