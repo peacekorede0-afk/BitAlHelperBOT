@@ -6,7 +6,9 @@ from flask import Flask, request
 # ==================== CONFIGURATION ====================
 TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
 BASE_URL = f'https://api.telegram.org/bot{TOKEN}'
-WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
+# Auto-detect Railway public domain or use manually set WEBHOOK_URL
+RAILWAY_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL', f'https://{RAILWAY_DOMAIN}/' if RAILWAY_DOMAIN else '')
 
 # ==================== VIDEO FILE IDs ====================
 VIDEOS = {
